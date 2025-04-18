@@ -31,12 +31,6 @@ function rebuild_images() {
 function start_cluster() {
   echo "🚀 Applying Kubernetes configurations..."
 
-  # MongoDB
-  MONGO_PATH=$(jq -r '.mongo.k8sPath' $CONFIG_FILE)
-  echo "→ Applying MongoDB resources from $MONGO_PATH"
-  kubectl apply -f "$MONGO_PATH/mongo-deployment.yaml"
-  kubectl apply -f "$MONGO_PATH/mongo-service.yaml"
-
   # All services
   jq -c '.services[]' $CONFIG_FILE | while read -r svc; do
     NAME=$(echo $svc | jq -r '.name')
@@ -61,12 +55,6 @@ function start_cluster() {
 
 function stop_cluster() {
   echo "🛑 Deleting Kubernetes resources..."
-
-  # MongoDB
-  MONGO_PATH=$(jq -r '.mongo.k8sPath' $CONFIG_FILE)
-  echo "→ Deleting MongoDB resources from $MONGO_PATH"
-  kubectl delete -f "$MONGO_PATH/mongo-deployment.yaml" || echo "⚠️ Warning: Failed to delete from $MONGO_PATH, continuing..."
-  kubectl delete -f "$MONGO_PATH/mongo-service.yaml" || echo "⚠️ Warning: Failed to delete from $MONGO_PATH, continuing..."
 
   # All services
   jq -c '.services[]' $CONFIG_FILE | while read -r svc; do

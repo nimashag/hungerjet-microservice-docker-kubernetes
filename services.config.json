@@ -33,9 +33,6 @@
       "k8sPath": "k8s/users-service"
     }
   ],
-  "mongo": {
-    "k8sPath": "k8s/mongo"
-  },
   "nginx": {
     "k8sPath": "k8s/nginx"
   }

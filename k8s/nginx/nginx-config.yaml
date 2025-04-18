@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+      listen 80;
+
+      # Proxy orders API routes to orders backend service
+      location /api/orders {
+        proxy_pass http://orders-service;
+      }
+      
+      # Proxy restaurants API routes to restaurants backend service
+      location /api/restaurants {
+        proxy_pass http://restaurants-service;
+      }         
+    }

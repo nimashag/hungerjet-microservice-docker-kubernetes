@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-service
+  template:
+    metadata:
+      labels:
+        app: orders-service
+    spec:
+      containers:
+        - name: orders-service
+          image: my-app/orders-service:latest
+          imagePullPolicy: IfNotPresent # Use the image if it exists locally before trying to pull from Docker Hub
+          ports:
+            - containerPort: 3002
+          env:
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017/my-app"

@@ -15,5 +15,10 @@ data:
       # Proxy restaurants API routes to restaurants backend service
       location /api/restaurants {
         proxy_pass http://restaurants-service;
-      }         
+      } 
+
+      # Proxy users API routes to users backend service
+      location /api/users {
+        proxy_pass http://users-service;
+      }    
     }

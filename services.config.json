@@ -23,6 +23,14 @@
       "port": 3002,
       "dockerImage": "my-app/orders-service:latest",
       "k8sPath": "k8s/orders-service"
+    },
+    {
+      "name": "users-service",
+      "prefix": "users",
+      "folder": "users-service",
+      "port": 3003,
+      "dockerImage": "my-app/users-service:latest",
+      "k8sPath": "k8s/users-service"
     }
   ],
   "mongo": {

@@ -73,6 +73,9 @@ chmod +x runner.sh
 
 # Restart all
 ./runner.sh stop up
+
+# Print logs
+./runner.sh logs orders
 ```
 
 ### Test APIs
@@ -170,5 +173,8 @@ kubectl get svc
 
 # Check PVCs
 kubectl get pvc
+
+# Exec into app container
+kubectl exec -it restaurants-service-78f66b858f-pgmnb -c restaurants-service -- /bin/sh
 ```
 

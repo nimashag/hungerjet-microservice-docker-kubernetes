@@ -108,6 +108,7 @@ function help_menu() {
   echo "  start        Create k8s resources"
   echo "  stop         Delete k8s resources"
   echo "  up           Rebuild docker + create k8s"
+  echo "  logs [pod]   Print logs from a selected pod"
   echo "  help         Show this help menu"
 }
 

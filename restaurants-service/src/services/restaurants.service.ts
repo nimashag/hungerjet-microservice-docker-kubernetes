@@ -1,7 +1,7 @@
 import { Restaurant } from '../models/restaurant.model';
 import { MenuItem } from '../models/menuItem.model';
 
-export const createRestaurant = (data: any) => Restaurant.create(data);
+export const createRestaurant = (data: any, userId: string) => Restaurant.create({ ...data, userId });
 export const getAllRestaurants = () => Restaurant.find();
 export const getRestaurantById = (id: string) => Restaurant.findById(id);
 export const toggleAvailability = async (id: string) => {

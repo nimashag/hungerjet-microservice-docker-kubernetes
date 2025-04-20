@@ -1,12 +1,43 @@
 import { Request, Response } from 'express';
 import * as restaurantsService from '../services/restaurants.service';
 
+// interface AuthenticatedRequest extends Request {
+//     user?: { _id: string }; // You can define a more specific user type later
+//   }
+  
+//   export const create = async (req: AuthenticatedRequest, res: Response) => {
+//     try {
+//       console.log('▶️ Creating a new restaurant:', req.body);
+//       const userId = req.user?._id;
+//       if (!userId) {
+//         return res.status(401).json({ message: 'Unauthorized' });
+//       }
+  
+//       const restaurant = await restaurantsService.createRestaurant(req.body, userId);
+//       console.log('Created restaurant with ID:', restaurant._id);
+//       res.json(restaurant);
+//     } catch (err) {
+//       console.error('Error creating restaurant:', err);
+//       res.status(500).json({ message: 'Something went wrong' });
+//     }
+// };
+
 export const create = async (req: Request, res: Response) => {
-    console.log('▶️ Creating a new restaurant:', req.body);
-    const restaurant = await restaurantsService.createRestaurant(req.body);
-    console.log('Created restaurant with ID:', restaurant._id);
-    res.json(restaurant);
-};
+    try {
+      console.log('▶️ Creating a new restaurant:', req.body);
+  
+      // 🔧 Hardcoded userId (replace with your actual MongoDB user ObjectId)
+      const hardcodedUserId = '661fe9d0c2e7e814f44fc877';
+  
+      const restaurant = await restaurantsService.createRestaurant(req.body, hardcodedUserId);
+      console.log('Created restaurant with ID:', restaurant._id);
+      res.json(restaurant);
+    } catch (err) {
+      console.error('Error creating restaurant:', err);
+      res.status(500).json({ message: 'Something went wrong' });
+    }
+  };
+  
 
 export const list = async (_req: Request, res: Response) => {
     console.log('▶️ Fetching all restaurants');

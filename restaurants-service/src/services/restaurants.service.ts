@@ -4,7 +4,13 @@ import { MenuItem } from '../models/menuItem.model';
 export const createRestaurant = (data: any) => Restaurant.create(data);
 export const getAllRestaurants = () => Restaurant.find();
 export const getRestaurantById = (id: string) => Restaurant.findById(id);
-export const toggleAvailability = (id: string) => Restaurant.findByIdAndUpdate(id, { $bit: { available: { xor: 1 } } }, { new: true });
+export const toggleAvailability = async (id: string) => {
+    const restaurant = await Restaurant.findById(id);
+    if (!restaurant) return null;
+    restaurant.available = !restaurant.available;
+    return restaurant.save();
+};
+
 
 export const addMenuItem = (restaurantId: string, item: any) =>
     MenuItem.create({ ...item, restaurantId });

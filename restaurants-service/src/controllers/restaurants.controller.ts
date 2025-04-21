@@ -22,21 +22,46 @@ import * as restaurantsService from '../services/restaurants.service';
 //     }
 // };
 
+// export const create = async (req: Request, res: Response) => {
+//     try {
+//       console.log('▶️ Creating a new restaurant:', req.body);
+  
+//       // 🔧 Hardcoded userId (replace with your actual MongoDB user ObjectId)
+//       const hardcodedUserId = '661fe9d0c2e7e814f44fc877';
+
+//       const image = req.file?.filename;
+      
+//       const restaurant = await restaurantsService.createRestaurant(req.body, hardcodedUserId);
+//       console.log('Created restaurant with ID:', restaurant._id);
+//       res.json(restaurant);
+//     } catch (err) {
+//       console.error('Error creating restaurant:', err);
+//       res.status(500).json({ message: 'Something went wrong' });
+//     }
+//   };
+
 export const create = async (req: Request, res: Response) => {
-    try {
-      console.log('▶️ Creating a new restaurant:', req.body);
-  
-      // 🔧 Hardcoded userId (replace with your actual MongoDB user ObjectId)
-      const hardcodedUserId = '661fe9d0c2e7e814f44fc877';
-  
-      const restaurant = await restaurantsService.createRestaurant(req.body, hardcodedUserId);
-      console.log('Created restaurant with ID:', restaurant._id);
-      res.json(restaurant);
-    } catch (err) {
-      console.error('Error creating restaurant:', err);
-      res.status(500).json({ message: 'Something went wrong' });
-    }
-  };
+    try{
+    console.log('▶️ Creating a new restaurant:', req.body);
+
+    const { name, address } = req.body;
+    const image = req.file?.filename;
+
+    const hardcodedUserId = '661fdbecf622d9bd45edb859'; // Replace with your actual ObjectId string
+
+    const restaurant = await restaurantsService.createRestaurant(
+        { name, address, image },
+        hardcodedUserId
+    );
+
+    console.log('✅ Created restaurant with ID:', restaurant._id);
+    res.json(restaurant);
+    }catch (err) {
+          console.error('Error creating restaurant:', err);
+          res.status(500).json({ message: 'Something went wrong' });
+        }
+};
+
   
 
 export const list = async (_req: Request, res: Response) => {
@@ -66,8 +91,20 @@ export const toggleAvailability = async (req: Request, res: Response) => {
 
 export const addMenuItem = async (req: Request, res: Response) => {
     console.log('▶️ Adding menu item for restaurant ID:', req.params.id, 'Item:', req.body);
-    const item = await restaurantsService.addMenuItem(req.params.id, req.body);
-    console.log('Added menu item with ID:', item._id);
+
+    const { name, description, price } = req.body;
+    const image = req.file?.filename; // For image upload
+
+    // Hardcoded user ID for testing
+    const hardcodedUserId = '661fe9d0c2e7e814f44fc877'; // Replace with actual userId
+
+    // Create the item with restaurantId and userId
+    const item = await restaurantsService.addMenuItem(
+        req.params.id, // restaurantId
+        { name, description, price, image, userId: hardcodedUserId } // item data with userId
+    );
+
+    console.log('✅ Added menu item with ID:', item._id);
     res.json(item);
 };
 

@@ -1,4 +1,4 @@
-import Order from '../models/order.model';
+import { Order } from '../models/order.model';
 
 export default class OrdersService {
     static createOrder(data: any) {

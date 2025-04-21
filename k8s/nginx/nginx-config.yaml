@@ -20,5 +20,10 @@ data:
       # Proxy users API routes to users backend service
       location /api/users {
         proxy_pass http://users-service;
-      }    
+      }   
+
+      # Proxy delivery API routes to delivery backend service
+      location /api/delivery {
+        proxy_pass http://delivery-service;
+      }  
     }

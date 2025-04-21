@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import Restaurants from './pages/Restaurants';
+import RestaurantDashboard from './pages/restuarants/RestaurantDashboard';
 import Orders from './pages/Orders';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -22,6 +23,7 @@ function App() {
         */}
             <Routes>
                 <Route path="/" element={<Restaurants />} />
+                <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
                 <Route path="/orders" element={<Orders />} />
 
                 {/* Login routes */}

@@ -35,7 +35,8 @@ export const AdminDashboard: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setRestaurant(res.data);
+        console.log("Fetched restaurant(s):", res.data);
+        setRestaurant(res.data[0]);
       } catch (err) {
         console.error("No restaurant found or error:", err);
       }
@@ -46,7 +47,7 @@ export const AdminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login-restaurant");
+    navigate("/login/restaurant");
   };
 
   return (
@@ -72,7 +73,7 @@ export const AdminDashboard: React.FC = () => {
                 <img
                   src={`http://localhost:3001/uploads/${restaurant.image}`}
                   alt="restaurant"
-                  className="mt-4 w-64 rounded-lg"
+                  className="mt-8 w-70 rounded-lg"
                 />
               )}
             </div>
@@ -80,7 +81,7 @@ export const AdminDashboard: React.FC = () => {
             <p>No restaurant created yet.</p>
           )}
         </div>
-
+        
         <div className="grid gap-4 md:grid-cols-2">
           {!restaurant && (
             <button

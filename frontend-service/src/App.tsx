@@ -12,6 +12,7 @@ import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import CustomerHome from './pages/users/customer/CustomerHome';
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
+import AdminDashboard from './pages/users/admin/AdminDashboard';
 
 function App() {
     return (
@@ -39,6 +40,11 @@ function App() {
 
                 {/* Customer Routes */}
                 <Route path="/customer-home" element={<CustomerHome />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+
             </Routes>
         </BrowserRouter>
     );

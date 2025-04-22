@@ -45,7 +45,7 @@ const LoginRestaurant = () => {
     try {
       const res = await axios.post('http://localhost:3003/api/auth/login', form);
       if (res.data.user.role === 'restaurantAdmin') {
-        navigate('/restaurant-home');
+        navigate('/restaurant-dash');
       } else {
         alert('Access denied: Not a restaurant admin');
       }

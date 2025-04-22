@@ -14,14 +14,6 @@ export interface IUser extends Document {
   phone?: string;
   address?: string;
 
-  // restaurantAdmin-specific
-  restaurantName?: string;
-  restaurantAddress?: string;
-
-  // deliveryPersonnel-specific
-  vehicleType?: string;
-  licenseNumber?: string;
-
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -40,13 +32,6 @@ const userSchema = new Schema<IUser>(
     phone: { type: String },
     address: { type: String },
 
-    // restaurantAdmin
-    restaurantName: { type: String },
-    restaurantAddress: { type: String },
-
-    // deliveryPersonnel
-    vehicleType: { type: String },
-    licenseNumber: { type: String },
   },
   { timestamps: true }
 );

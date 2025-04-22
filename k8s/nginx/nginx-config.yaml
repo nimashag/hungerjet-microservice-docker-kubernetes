@@ -18,7 +18,7 @@ data:
       } 
 
       # Proxy users API routes to users backend service
-      location /api/users {
+      location /api/auth {
         proxy_pass http://users-service;
       }   
 

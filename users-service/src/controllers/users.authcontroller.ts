@@ -16,23 +16,11 @@ export const registerUser = async (req: Request, res: Response) => {
       role,
       phone,
       address,
-      restaurantName,
-      restaurantAddress,
-      vehicleType,
-      licenseNumber,
     } = req.body;
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
-    }
-
-    if (role === 'restaurantAdmin' && (!restaurantName || !restaurantAddress)) {
-      return res.status(400).json({ message: 'Restaurant details are required' });
-    }
-
-    if (role === 'deliveryPersonnel' && (!vehicleType || !licenseNumber)) {
-      return res.status(400).json({ message: 'Vehicle and license details are required' });
     }
 
     const newUser = new UserModel({
@@ -42,10 +30,6 @@ export const registerUser = async (req: Request, res: Response) => {
       role,
       phone,
       address,
-      restaurantName,
-      restaurantAddress,
-      vehicleType,
-      licenseNumber,
     });
 
     await newUser.save();
@@ -70,7 +54,7 @@ export const loginUser = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '30d' }
     );
 
     res.json({

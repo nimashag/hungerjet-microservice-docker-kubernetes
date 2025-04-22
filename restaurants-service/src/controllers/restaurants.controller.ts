@@ -1,18 +1,21 @@
 import { Request, Response } from "express";
 import * as restaurantsService from "../services/restaurants.service";
+import { AuthenticatedRequest } from "../middlewares/auth";
 
-export const create = async (req: Request, res: Response) => {
+export const create = async (req: AuthenticatedRequest, res: Response) => {
   try {
     console.log("▶️ Creating a new restaurant:", req.body);
 
     const { name, address } = req.body;
     const image = req.file?.filename;
 
-    const hardcodedUserId = "661fdbecf622d9bd45edb859"; // Replace with your actual ObjectId string
+    // const hardcodedUserId = "661fdbecf622d9bd45edb859"; // Replace with your actual ObjectId string
+
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
     const restaurant = await restaurantsService.createRestaurant(
       { name, address, image },
-      hardcodedUserId
+      req.user.id
     );
 
     console.log("✅ Created restaurant with ID:", restaurant._id);
@@ -80,7 +83,7 @@ export const toggleAvailability = async (req: Request, res: Response) => {
   res.json(updated);
 };
 
-export const addMenuItem = async (req: Request, res: Response) => {
+export const addMenuItem = async (req: AuthenticatedRequest, res: Response) => {
   console.log(
     "▶️ Adding menu item for restaurant ID:",
     req.params.id,
@@ -88,16 +91,17 @@ export const addMenuItem = async (req: Request, res: Response) => {
     req.body
   );
 
-  const { name, description, price } = req.body;
+  const { name, description, price, category } = req.body;
   const image = req.file?.filename; // For image upload
 
-  // Hardcoded user ID for testing
-  const hardcodedUserId = "661fe9d0c2e7e814f44fc877"; // Replace with actual userId
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   // Create the item with restaurantId and userId
   const item = await restaurantsService.addMenuItem(
     req.params.id, // restaurantId
-    { name, description, price, image, userId: hardcodedUserId } // item data with userId
+    { name, description, price, category, image, userId: req.user.id, } // item data with userId
   );
 
   console.log("✅ Added menu item with ID:", item._id);

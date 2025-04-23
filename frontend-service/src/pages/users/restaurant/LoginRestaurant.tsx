@@ -55,6 +55,7 @@ const LoginRestaurant = () => {
 
       if (user.role === "restaurantAdmin") {
         localStorage.setItem("token", token); // Save token to localStorage
+        localStorage.setItem("user", JSON.stringify(user)); // Save user info
         navigate("/restaurant-dash");
       } else {
         alert("Access denied: Not a restaurant admin");

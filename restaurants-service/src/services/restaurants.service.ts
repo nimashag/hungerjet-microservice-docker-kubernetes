@@ -8,6 +8,10 @@ export const getAllRestaurants = () => Restaurant.find();
 
 export const getRestaurantById = (id: string) => Restaurant.findById(id);
 
+export const getRestaurantByUserId = (userId: string) =>
+  Restaurant.find({ userId });
+
+
 export const toggleAvailability = async (id: string) => {
   const restaurant = await Restaurant.findById(id);
   if (!restaurant) return null;

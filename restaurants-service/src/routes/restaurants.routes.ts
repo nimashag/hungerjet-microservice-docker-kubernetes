@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post('/', upload.single('image'), authenticate, authorizeRoles("restaurantAdmin"), ctrl.create);
 router.get('/', ctrl.list);
+router.get("/my", authenticate, authorizeRoles("restaurantAdmin"), ctrl.getByUser);
 router.get('/:id', ctrl.getOne);
 router.patch('/:id/availability', authenticate, authorizeRoles("restaurantAdmin"), ctrl.toggleAvailability);
 router.put('/:id', upload.single('image'), authenticate, authorizeRoles("restaurantAdmin"), ctrl.update);

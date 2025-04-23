@@ -12,6 +12,8 @@ router.get("/my", authenticate, authorizeRoles("restaurantAdmin"), ctrl.getByUse
 router.get('/:id', ctrl.getOne);
 router.patch('/:id/availability', authenticate, authorizeRoles("restaurantAdmin"), ctrl.toggleAvailability);
 router.put('/:id', upload.single('image'), authenticate, authorizeRoles("restaurantAdmin"), ctrl.update);
+router.delete('/:id', authenticate, authorizeRoles("restaurantAdmin"), ctrl.remove);
+
 
 router.post('/:id/menu-items', upload.single('image'), authenticate, authorizeRoles("restaurantAdmin"), ctrl.addMenuItem);
 router.get('/:id/menu-items', ctrl.listMenuItems);

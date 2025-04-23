@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AdminLayout from "./RestaurantAdminLayout";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { Dialog, Transition } from "@headlessui/react";
+import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
 const API_BASE = "http://localhost:3001";
@@ -130,6 +131,36 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteRestaurant = async () => {
+    if (!restaurant) return;
+
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete your restaurant!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(`${API_BASE}/api/restaurants/${restaurant._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setRestaurant(null);
+        Swal.fire("Deleted!", "Your restaurant has been deleted.", "success");
+      } catch (err) {
+        console.error("Delete failed:", err);
+        Swal.fire("Error", "Failed to delete restaurant.", "error");
+      }
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gradient from-gray-50 to-gray-200 p-4">
@@ -147,7 +178,7 @@ export const AdminDashboard: React.FC = () => {
                 <LuPencil />
               </button>
               <button
-                onClick={handleLogout}
+                onClick={handleDeleteRestaurant}
                 className="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-full shadow-sm transition flex items-center justify-center text-xl"
                 title="Delete"
               >
@@ -210,7 +241,7 @@ export const AdminDashboard: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {!restaurant && (
               <button
                 onClick={() => setIsCreateOpen(true)}
@@ -219,13 +250,28 @@ export const AdminDashboard: React.FC = () => {
                 ➕ Create Restaurant
               </button>
             )}
+          </div> */}
+          <div className="grid  gap-4">
+            {!restaurant && (
+              <button
+                onClick={() => setIsCreateOpen(true)}
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 hover:from-green-500 hover:via-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Plus className="w-5 h-5" />
+                Create Restaurant
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Create Restaurant Modal */}
       <Transition appear show={isCreateOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsCreateOpen(false)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setIsCreateOpen(false)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -250,12 +296,20 @@ export const AdminDashboard: React.FC = () => {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 text-left shadow-xl transition-all">
-                  <Dialog.Title as="h3" className="text-lg font-bold leading-6 text-purple-600">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-bold leading-6 text-purple-600"
+                  >
                     Create New Restaurant
                   </Dialog.Title>
-                  <form className="mt-4 space-y-4" onSubmit={handleCreateRestaurant}>
+                  <form
+                    className="mt-4 space-y-4"
+                    onSubmit={handleCreateRestaurant}
+                  >
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Restaurant Name</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Restaurant Name
+                      </label>
                       <input
                         type="text"
                         name="name"
@@ -266,7 +320,9 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Address
+                      </label>
                       <input
                         type="text"
                         name="address"
@@ -277,7 +333,9 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Image</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Image
+                      </label>
                       <input
                         type="file"
                         name="image"

@@ -26,6 +26,10 @@ export const updateRestaurant = async (id: string, data: any) => {
   return updatedRestaurant;
 };
 
+export const deleteRestaurant = (id: string) =>
+  Restaurant.findByIdAndDelete(id);
+
+
 export const addMenuItem = (restaurantId: string, item: any) =>
   MenuItem.create({ ...item, restaurantId });
 

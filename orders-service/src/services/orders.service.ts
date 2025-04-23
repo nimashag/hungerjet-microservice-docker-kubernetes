@@ -16,23 +16,3 @@ export const updateOrder = async (id: string, data: any) => {
 export const deleteOrder = async (id: string) => {
   return await Order.findByIdAndDelete(id);
 };
-
-// export default class OrdersService {
-    
-
-//     static getAllOrders() {
-//         return Order.find();
-//     }
-
-//     static getOrderById(id: string) {
-//         return Order.findById(id);
-//     }
-
-//     static updateOrder(id: string, data: any) {
-//         return Order.findByIdAndUpdate(id, data, { new: true });
-//     }
-
-//     static deleteOrder(id: string) {
-//         return Order.findByIdAndDelete(id);
-//     }
-// }

@@ -36,6 +36,8 @@ export const addMenuItem = (restaurantId: string, item: any) =>
 export const getOneMenuItem = (itemId: string) =>
     MenuItem.findById(itemId);
   
+export const getMenuItemsByUser = (userId: string) =>
+  MenuItem.find({ userId });
 
 export const listMenuItems = (restaurantId: string) =>
   MenuItem.find({ restaurantId });

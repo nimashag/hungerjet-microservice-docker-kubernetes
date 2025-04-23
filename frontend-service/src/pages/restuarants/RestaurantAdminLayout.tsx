@@ -56,9 +56,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       href: "/restaurant-dash",
       icon: LayoutDashboard,
     },
-    { name: "Menu Items", href: "/admin/customers", icon: UtensilsCrossed },
-    { name: "Orders", href: "/admin/restaurants", icon: ShoppingCart },
-    { name: "Analytics", href: "/admin/analytics", icon: BarChart2 },
+    { name: "Menu Items", href: "/restaurant-menu", icon: UtensilsCrossed },
+    { name: "Orders", href: "/restaurant-orders", icon: ShoppingCart },
+    { name: "Analytics", href: "/restaurant-analytics", icon: BarChart2 },
   ];
 
   return (

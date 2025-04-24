@@ -1,8 +1,7 @@
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
-import Restaurants from './pages/Restaurants';
 
-import RestaurantDashboard from './pages/restuarants/RestaurantDashboard';
-import MenuItems from "./pages/restuarants/MenuItems";
+import RestaurantDashboard from './pages/users/restaurant/RestaurantDashboard';
+import MenuItems from "./pages/users/restaurant/MenuItems";
 
 import Orders from './pages/Orders';
 
@@ -30,7 +29,6 @@ function App() {
             </nav>
         */}
             <Routes>
-                <Route path="/" element={<Restaurants />} />
 
                 {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />

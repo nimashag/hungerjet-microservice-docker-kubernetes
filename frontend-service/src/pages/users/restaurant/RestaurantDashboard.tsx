@@ -73,7 +73,7 @@ export const AdminDashboard: React.FC = () => {
       Swal.fire("Validation Error", "Restaurant name is required.", "warning");
       return;
     }
-  
+
     if (!form.address.trim()) {
       Swal.fire("Validation Error", "Address is required.", "warning");
       return;
@@ -119,12 +119,12 @@ export const AdminDashboard: React.FC = () => {
       Swal.fire("Validation Error", "Restaurant name is required.", "warning");
       return;
     }
-  
+
     if (!editForm.address.trim()) {
       Swal.fire("Validation Error", "Address is required.", "warning");
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("name", editForm.name);
     formData.append("address", editForm.address);

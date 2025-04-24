@@ -1,6 +1,10 @@
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
-import Restaurants from './pages/Restaurants';
-import RestaurantDashboard from './pages/restuarants/RestaurantDashboard';
+
+import RestaurantDashboard from './pages/users/restaurant/RestaurantDashboard';
+import MenuItems from "./pages/users/restaurant/MenuItems";
+import RestaurantOrders from "./pages/users/restaurant/RestaurantOrdersPage";
+import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
+
 import Orders from './pages/Orders';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -9,10 +13,17 @@ import LoginDelivery from './pages/users/delivery/LoginDelivery';
 import LoginRestaurant from './pages/users/restaurant/LoginRestaurant';
 
 import RegisterCustomer from './pages/users/customer/RegisterCustomer';
-import CustomerHome from './pages/users/customer/CustomerHome';
+import Home from './pages/users/customer/CustomerHome';
+import RestaurantList from './pages/users/customer/RestaurantList';
+
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
 import OrderList from './pages/users/customer/OrderList';
+import AdminDashboard from './pages/users/admin/AdminDashboard';
+import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
+import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
+import AdminDrivers from './pages/users/admin/UserTables/AdminDrivers';
+import AdminAnalytics from './pages/users/admin/AdminAnalytics';
 
 function App() {
     return (
@@ -23,8 +34,14 @@ function App() {
             </nav>
         */}
             <Routes>
-                <Route path="/" element={<Restaurants />} />
+
+                {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
+                <Route path="/restaurant-menu" element={<MenuItems />} />
+                <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
+                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} />
+
+                {/* Orders routes */}
                 <Route path="/orders" element={<Orders />} />
 
                 {/* Login routes */}
@@ -41,6 +58,16 @@ function App() {
                 {/* Customer Routes */}
                 <Route path="/customer-home" element={<CustomerHome />} />
                 <Route path="/my-orders" element={<OrderList />}/>
+                <Route path="/customer-home" element={<Home />} />
+                <Route path="/restaurants" element={<RestaurantList />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/customers" element={<AdminCustomers />} />
+                <Route path='/admin/restaurants' element={<AdminRestaurant />} />
+                <Route path='/admin/drivers' element={<AdminDrivers />} />
+                <Route path='/admin/analytics' element={<AdminAnalytics />} />
+
             </Routes>
         </BrowserRouter>
     );

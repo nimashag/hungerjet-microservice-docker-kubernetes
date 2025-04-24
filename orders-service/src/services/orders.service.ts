@@ -6,6 +6,10 @@ export const getAllOrders = () => Order.find();
 
 export const getOrderById = (id: string) => Order.findById(id);
 
+export const getOrdersByRestaurantId = (restaurantId: string) => {
+  return Order.find({ restaurantId });
+};
+
 export const updateOrder = async (id: string, data: any) => {
     const updatedOrder = await Order.findByIdAndUpdate(id, data, {
       new: true,

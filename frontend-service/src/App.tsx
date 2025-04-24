@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import RestaurantDashboard from './pages/users/restaurant/RestaurantDashboard';
 import MenuItems from "./pages/users/restaurant/MenuItems";
 import RestaurantOrders from "./pages/users/restaurant/RestaurantOrdersPage";
+import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
 
 import Orders from './pages/Orders';
 
@@ -12,7 +13,9 @@ import LoginDelivery from './pages/users/delivery/LoginDelivery';
 import LoginRestaurant from './pages/users/restaurant/LoginRestaurant';
 
 import RegisterCustomer from './pages/users/customer/RegisterCustomer';
-import CustomerHome from './pages/users/customer/CustomerHome';
+import Home from './pages/users/customer/CustomerHome';
+import RestaurantList from './pages/users/customer/RestaurantList';
+
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
 import AdminDashboard from './pages/users/admin/AdminDashboard';
@@ -35,7 +38,7 @@ function App() {
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
                 <Route path="/restaurant-menu" element={<MenuItems />} />
                 <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
-                {/* <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} */}
+                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} />
 
                 {/* Orders routes */}
                 <Route path="/orders" element={<Orders />} />
@@ -52,7 +55,8 @@ function App() {
                 <Route path="/register/restaurant" element={<RegisterRestaurant />} />
 
                 {/* Customer Routes */}
-                <Route path="/customer-home" element={<CustomerHome />} />
+                <Route path="/customer-home" element={<Home />} />
+                <Route path="/restaurants" element={<RestaurantList />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />

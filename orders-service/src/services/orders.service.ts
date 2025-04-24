@@ -1,23 +1,18 @@
 import { Order } from '../models/order.model';
 
-export default class OrdersService {
-    static createOrder(data: any) {
-        return Order.create(data);
-    }
+export const createOrder = (data: any, userId: string) => Order.create({ ...data, userId });
 
-    static getAllOrders() {
-        return Order.find();
-    }
+export const getAllOrders = () => Order.find();
 
-    static getOrderById(id: string) {
-        return Order.findById(id);
-    }
+export const getOrderById = (id: string) => Order.findById(id);
 
-    static updateOrder(id: string, data: any) {
-        return Order.findByIdAndUpdate(id, data, { new: true });
-    }
+export const updateOrder = async (id: string, data: any) => {
+    const updatedOrder = await Order.findByIdAndUpdate(id, data, {
+      new: true,
+    });
+    return updatedOrder;
+};
 
-    static deleteOrder(id: string) {
-        return Order.findByIdAndDelete(id);
-    }
-}
+export const deleteOrder = async (id: string) => {
+  return await Order.findByIdAndDelete(id);
+};

@@ -1,6 +1,9 @@
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import Restaurants from './pages/Restaurants';
+
 import RestaurantDashboard from './pages/restuarants/RestaurantDashboard';
+import MenuItems from "./pages/restuarants/MenuItems";
+
 import Orders from './pages/Orders';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -28,7 +31,14 @@ function App() {
         */}
             <Routes>
                 <Route path="/" element={<Restaurants />} />
+
+                {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
+                <Route path="/restaurant-menu" element={<MenuItems />} />
+                {/* <Route path="/restaurant-orders" element={<RestaurantOrders />} />
+                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} /> */}
+
+                {/* Orders routes */}
                 <Route path="/orders" element={<Orders />} />
 
                 {/* Login routes */}

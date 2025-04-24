@@ -44,7 +44,10 @@ const LoginAdmin = () => {
 
     try {
       const res = await axios.post('http://localhost:3003/api/auth/login', form);
+
       if (res.data.user.role === 'appAdmin') {
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         navigate('/admin-dashboard');
       } else {
         alert('Access denied: Not a system administrator');
@@ -71,14 +74,14 @@ const LoginAdmin = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-blue-100 via-white to-purple-200 font-sans">
+      {/* Left Panel with Glassmorphism */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Admin Login
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Welcome back, system admin. Manage users and monitor the platform.
           </p>
 
@@ -90,7 +93,7 @@ const LoginAdmin = () => {
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.email ? 'border-red-500' : 'focus:ring-green-500'
                 }`}
               />
@@ -104,7 +107,7 @@ const LoginAdmin = () => {
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.password ? 'border-red-500' : 'focus:ring-green-500'
                 }`}
               />

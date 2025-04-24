@@ -16,6 +16,10 @@ import CustomerHome from './pages/users/customer/CustomerHome';
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
 import AdminDashboard from './pages/users/admin/AdminDashboard';
+import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
+import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
+import AdminDrivers from './pages/users/admin/UserTables/AdminDrivers';
+import AdminAnalytics from './pages/users/admin/AdminAnalytics';
 
 function App() {
     return (
@@ -53,7 +57,10 @@ function App() {
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
-
+                <Route path="/admin/customers" element={<AdminCustomers />} />
+                <Route path='/admin/restaurants' element={<AdminRestaurant />} />
+                <Route path='/admin/drivers' element={<AdminDrivers />} />
+                <Route path='/admin/analytics' element={<AdminAnalytics />} />
 
             </Routes>
         </BrowserRouter>

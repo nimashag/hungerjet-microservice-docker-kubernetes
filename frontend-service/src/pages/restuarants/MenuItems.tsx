@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "./RestaurantAdminLayout";
-import { Pencil, Trash2, PlusCircle } from "lucide-react";
+import { Pencil, Trash2, PlusCircle, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { Dialog } from "@headlessui/react";
 
 const MySwal = withReactContent(Swal);
 
@@ -29,6 +28,9 @@ interface Restaurant {
 const MenuItems = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -74,6 +76,7 @@ const MenuItems = () => {
         }
       );
       setMenuItems(response.data);
+      setFilteredItems(response.data);
     } catch (error) {
       console.error("Error fetching menu items:", error);
     } finally {
@@ -85,6 +88,30 @@ const MenuItems = () => {
     fetchRestaurant();
     fetchMenuItems();
   }, []);
+
+  useEffect(() => {
+    const filtered = menuItems.filter((item) => {
+      const matchesSearch =
+        item.name.toLowerCase().includes(search.toLowerCase()) ||
+        item.category.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory =
+        !filterCategory || item.category === filterCategory;
+      return matchesSearch && matchesCategory;
+    });
+    setFilteredItems(filtered);
+  }, [search, filterCategory, menuItems]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleCategoryFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilterCategory(e.target.value);
+  };
+
+  const categories = Array.from(
+    new Set(menuItems.map((item) => item.category))
+  );
 
   const handleCreateSubmit = async () => {
     // Validation
@@ -261,15 +288,44 @@ const MenuItems = () => {
   return (
     <AdminLayout>
       <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          {/* <h1 className="text-xl font-semibold text-neutral-800">Menu Items</h1> */}
+        <div className="flex justify-between items-center flex-wrap gap-4 mb-4">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-primary text-green-600 px-6 py-4 text-lg rounded hover:bg-primary/90 transition"
+            className="flex items-center gap-2 bg-primary text-green-600 px-6 py-3 text-lg rounded-xl hover:bg-primary/90 transition whitespace-nowrap"
           >
             <PlusCircle size={18} />
             Create Menu Item
           </button>
+
+          <div className="flex items-center gap-4">
+            {/* Search input with icon */}
+            <div className="relative w-[220px]">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={handleSearchChange}
+                className="w-full pl-10 p-2 border border-neutral-300 rounded-xl focus:outline-none"
+              />
+            </div>
+
+            {/* Filter select */}
+            <select
+              value={filterCategory}
+              onChange={handleCategoryFilter}
+              className="p-2 border border-neutral-300 rounded-xl min-w-[160px]"
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="overflow-x-auto bg-white shadow-lg rounded-lg p-3">
@@ -297,7 +353,7 @@ const MenuItems = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
-              {menuItems.map((item) => (
+              {filteredItems.map((item) => (
                 <tr key={item._id} className="hover:bg-neutral-50">
                   <td className="px-4 py-3">
                     {item.image ? (

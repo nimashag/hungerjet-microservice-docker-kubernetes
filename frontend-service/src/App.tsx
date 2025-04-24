@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 
 import RestaurantDashboard from './pages/users/restaurant/RestaurantDashboard';
 import MenuItems from "./pages/users/restaurant/MenuItems";
+import RestaurantOrders from "./pages/users/restaurant/RestaurantOrdersPage";
 
 import Orders from './pages/Orders';
 
@@ -33,8 +34,8 @@ function App() {
                 {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
                 <Route path="/restaurant-menu" element={<MenuItems />} />
-                {/* <Route path="/restaurant-orders" element={<RestaurantOrders />} />
-                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} /> */}
+                <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
+                {/* <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} */}
 
                 {/* Orders routes */}
                 <Route path="/orders" element={<Orders />} />

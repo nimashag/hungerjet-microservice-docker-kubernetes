@@ -288,6 +288,7 @@ const MenuItems = () => {
   return (
     <AdminLayout>
       <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-4 text-center">Restaurant Menu-Items</h1>
         <div className="flex justify-between items-center flex-wrap gap-4 mb-4">
           <button
             onClick={() => setShowCreateModal(true)}

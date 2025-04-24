@@ -1,6 +1,9 @@
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import Restaurants from './pages/Restaurants';
+
 import RestaurantDashboard from './pages/restuarants/RestaurantDashboard';
+import MenuItems from "./pages/restuarants/MenuItems";
+
 import Orders from './pages/Orders';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -12,6 +15,7 @@ import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import CustomerHome from './pages/users/customer/CustomerHome';
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
+import AdminDashboard from './pages/users/admin/AdminDashboard';
 
 function App() {
     return (
@@ -23,7 +27,14 @@ function App() {
         */}
             <Routes>
                 <Route path="/" element={<Restaurants />} />
+
+                {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
+                <Route path="/restaurant-menu" element={<MenuItems />} />
+                {/* <Route path="/restaurant-orders" element={<RestaurantOrders />} />
+                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} /> */}
+
+                {/* Orders routes */}
                 <Route path="/orders" element={<Orders />} />
 
                 {/* Login routes */}
@@ -39,6 +50,11 @@ function App() {
 
                 {/* Customer Routes */}
                 <Route path="/customer-home" element={<CustomerHome />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+
             </Routes>
         </BrowserRouter>
     );

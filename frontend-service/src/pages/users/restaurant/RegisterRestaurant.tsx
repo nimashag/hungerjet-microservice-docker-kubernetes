@@ -10,8 +10,6 @@ const RegisterRestaurant = () => {
     password: '',
     phone: '',
     address: '',
-    restaurantName: '',
-    restaurantAddress: ''
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -32,9 +30,7 @@ const RegisterRestaurant = () => {
       'email',
       'password',
       'phone',
-      'address',
-      'restaurantName',
-      'restaurantAddress'
+      'address'
     ];
 
     requiredFields.forEach(field => {
@@ -69,7 +65,7 @@ const RegisterRestaurant = () => {
       });
 
       alert(res.data.message || 'Registered successfully!');
-      navigate('/restaurant-home');
+      navigate('/restaurant-dash');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Registration failed');
     }
@@ -119,8 +115,6 @@ const RegisterRestaurant = () => {
               { name: 'password', placeholder: 'Password', type: 'password' },
               { name: 'phone', placeholder: 'Phone' },
               { name: 'address', placeholder: 'Personal Address' },
-              { name: 'restaurantName', placeholder: 'Restaurant Name' },
-              { name: 'restaurantAddress', placeholder: 'Restaurant Address' }
             ].map(field => (
               <div key={field.name}>
                 <input

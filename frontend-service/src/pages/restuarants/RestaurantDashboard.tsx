@@ -69,6 +69,16 @@ export const AdminDashboard: React.FC = () => {
   const handleCreateRestaurant = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!form.name.trim()) {
+      Swal.fire("Validation Error", "Restaurant name is required.", "warning");
+      return;
+    }
+  
+    if (!form.address.trim()) {
+      Swal.fire("Validation Error", "Address is required.", "warning");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("address", form.address);
@@ -105,6 +115,16 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     if (!restaurant) return;
 
+    if (!editForm.name.trim()) {
+      Swal.fire("Validation Error", "Restaurant name is required.", "warning");
+      return;
+    }
+  
+    if (!editForm.address.trim()) {
+      Swal.fire("Validation Error", "Address is required.", "warning");
+      return;
+    }
+    
     const formData = new FormData();
     formData.append("name", editForm.name);
     formData.append("address", editForm.address);
@@ -379,73 +399,6 @@ export const AdminDashboard: React.FC = () => {
             <Dialog.Title className="text-xl font-bold">
               Edit Restaurant
             </Dialog.Title>
-            {/* <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="block font-medium">Name</label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, name: e.target.value })
-                  }
-                  className="w-full border p-2 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Address</label>
-                <input
-                  type="text"
-                  value={editForm.address}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, address: e.target.value })
-                  }
-                  className="w-full border p-2 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-medium">Available</label>
-                <input
-                  type="checkbox"
-                  checked={editForm.available}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, available: e.target.checked })
-                  }
-                  className="mr-2"
-                />
-                <span>{editForm.available ? "Open" : "Closed"}</span>
-              </div>
-              <div>
-                <label className="block font-medium">Image (optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      image: e.target.files?.[0] || null,
-                    })
-                  }
-                  className="w-full"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </div>
-            </form> */}
             <form onSubmit={handleEditSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">

@@ -14,7 +14,7 @@ const orderSchema = new mongoose.Schema({
   status: {type: String, enum: ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'], default: 'Pending'},
   totalAmount: {type: Number, required: true},
   deliveryAddress: {street: String, city: String, state: String, zipCode: String, country: String},
-  paymentStatus: {type: String, enum: ['pending', 'paid', 'failed'], default: 'pending'},
+  paymentStatus: {type: String, enum: ['Pending', 'Paid', 'Failed'], default: 'Pending'},
   paymentMethod: {type: String, enum: ['PayHere', 'DialogGenie', 'FriMi', 'Stripe', 'PayPal'], required: true},
   specialInstructions: {type: String, default: ''}
 }, {

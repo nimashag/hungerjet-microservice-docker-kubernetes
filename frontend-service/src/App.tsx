@@ -12,6 +12,7 @@ import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import CustomerHome from './pages/users/customer/CustomerHome';
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
+import OrderList from './pages/users/customer/OrderList';
 
 function App() {
     return (
@@ -39,6 +40,7 @@ function App() {
 
                 {/* Customer Routes */}
                 <Route path="/customer-home" element={<CustomerHome />} />
+                <Route path="/my-orders" element={<OrderList />}/>
             </Routes>
         </BrowserRouter>
     );

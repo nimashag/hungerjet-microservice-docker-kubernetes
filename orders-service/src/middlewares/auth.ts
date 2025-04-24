@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = "be5e2c89748a4281d8c0f15a8f0a8e4f047769c616960281bdfa6c011f2b2b31fb4c44ed42a41f87341389e3cb411464ac0a0d926d624c7272293787ae7f83d4"; 
 
 export interface AuthenticatedRequest extends Request {
-  user?: { id: string; role: string };
+  user?: { id: string; role: string; restaurantId?: string; };
 }
 
 export const authenticate = (

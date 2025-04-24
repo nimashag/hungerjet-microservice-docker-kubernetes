@@ -11,4 +11,16 @@ router.get('/:id', ctrl.getOne);
 router.put('/:id', authenticate, authorizeRoles("customer"), ctrl.update);
 router.delete('/:id', authenticate, authorizeRoles("customer"), ctrl.deleteOrder);
 
+// Get current user's orders
+router.get('/user/current', authenticate, ctrl.getCurrentUserOrders);
+
+// Get orders for restaurant admin's restaurant
+router.get('/restaurant/current', authenticate, authorizeRoles("restaurantAdmin"), ctrl.getRestaurantOrders);
+
+// Update just the order status
+router.patch('/:id/status', authenticate, authorizeRoles("admin", "restaurantAdmin"), ctrl.updateOrderStatus);
+
+// Process payment for an order
+router.post('/:id/payment', authenticate, authorizeRoles("customer"), ctrl.processPayment);
+
 export default router;

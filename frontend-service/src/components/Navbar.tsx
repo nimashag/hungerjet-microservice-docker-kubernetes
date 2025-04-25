@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
       <ul className="hidden sm:flex gap-8 text-sm text-[#4E342E]">
         {[
           { to: "/", text: "Home" },
-          { to: "/newarrivals", text: "Restaurants" },
+          { to: "/restaurants", text: "Restaurants" },
           { to: "/about", text: "About Us" },
           { to: "/contactus", text: "Contact Us" },
           { to: "/faqs", text: "FAQs" },

@@ -15,6 +15,7 @@ import LoginRestaurant from './pages/users/restaurant/LoginRestaurant';
 import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import Home from './pages/users/customer/CustomerHome';
 import RestaurantList from './pages/users/customer/RestaurantList';
+import RestaurantMenu from './pages/users/customer/RestaurantMenu';
 
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
@@ -57,6 +58,7 @@ function App() {
                 {/* Customer Routes */}
                 <Route path="/customer-home" element={<Home />} />
                 <Route path="/restaurants" element={<RestaurantList />} />
+                <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />

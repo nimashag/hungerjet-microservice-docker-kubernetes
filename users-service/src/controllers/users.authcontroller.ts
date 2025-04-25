@@ -16,23 +16,13 @@ export const registerUser = async (req: Request, res: Response) => {
       role,
       phone,
       address,
-      restaurantName,
-      restaurantAddress,
-      vehicleType,
-      licenseNumber,
     } = req.body;
+
+    console.log('Register request received with data:', req.body);
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
-    }
-
-    if (role === 'restaurantAdmin' && (!restaurantName || !restaurantAddress)) {
-      return res.status(400).json({ message: 'Restaurant details are required' });
-    }
-
-    if (role === 'deliveryPersonnel' && (!vehicleType || !licenseNumber)) {
-      return res.status(400).json({ message: 'Vehicle and license details are required' });
     }
 
     const newUser = new UserModel({
@@ -42,13 +32,10 @@ export const registerUser = async (req: Request, res: Response) => {
       role,
       phone,
       address,
-      restaurantName,
-      restaurantAddress,
-      vehicleType,
-      licenseNumber,
     });
 
     await newUser.save();
+    console.log('New user registered with ID:', newUser._id.toString());
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Register error:', err);
@@ -68,12 +55,14 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id.toString(), role: user.role },
       JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '30d' }
     );
 
-    res.json({
+    console.log('User logged in with ID:', user._id.toString()); // Debug: Track login
+
+    const response = {
       token,
       user: {
         id: user._id,
@@ -82,7 +71,10 @@ export const loginUser = async (req: Request, res: Response) => {
         role: user.role,
         isApproved: user.isApproved
       }
-    });
+    };
+
+    console.log(`Response: ${JSON.stringify(response)}`);
+    res.json(response);
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Login failed', error: err });

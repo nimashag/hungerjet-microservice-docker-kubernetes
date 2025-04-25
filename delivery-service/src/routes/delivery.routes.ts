@@ -6,7 +6,7 @@ const router = express.Router();
 // Static/specific routes first
 router.post('/create', DeliveryController.createDelivery);
 router.patch('/:id/assign', DeliveryController.assignDriver);
-router.patch('/:id/accept', DeliveryController.acceptDelivery);
+router.patch('/:id/accept', DeliveryController.acceptDelivery); // have to add authmiddleware to this
 router.patch('/:id/status', DeliveryController.updateStatus);
 router.patch('/:id/location', DeliveryController.updateDeliveryLocation);
 

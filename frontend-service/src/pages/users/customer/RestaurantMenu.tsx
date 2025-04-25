@@ -136,44 +136,6 @@ const RestaurantMenu: React.FC = () => {
                   No items found.
                 </p>
               ) : (
-                // <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                //   {filteredItems.map((item) => (
-                //     <div
-                //       key={item._id}
-                //       className="bg-white rounded-xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-                //     >
-                //       <img
-                //         src={`http://localhost:3001/uploads/${item.image}`}
-                //         alt={item.name}
-                //         className="w-full h-44 object-cover"
-                //       />
-                //       <div className="p-5 space-y-2">
-                //         <h2 className="text-lg font-semibold text-gray-800">
-                //           {item.name}
-                //         </h2>
-                //         <p className="text-sm text-gray-500">
-                //           {item.description}
-                //         </p>
-                //         <div className="flex justify-between items-center mt-2">
-                //           <span className="text-sm text-gray-500 italic">
-                //             {item.category}
-                //           </span>
-                //           <span className="text-base font-semibold text-green-600">
-                //             $ {item.price.toFixed(2)}
-                //           </span>
-                //         </div>
-                //         <div className="flex justify-center">
-                //           <button
-                //             onClick={() => handleAddToCart(item)}
-                //             className="mt-4 inline-flex items-center justify-center px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl shadow transition-all duration-200"
-                //           >
-                //             <FaShoppingCart className="mr-2" /> Add to Cart
-                //           </button>
-                //         </div>
-                //       </div>
-                //     </div>
-                //   ))}
-                // </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 font-[Inter] text-[#2E2E2E]">
                   {filteredItems.map((item) => (
                     <div

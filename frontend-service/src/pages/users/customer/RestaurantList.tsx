@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
+import { FaSearch } from "react-icons/fa";
 
 type Restaurant = {
   _id: string;
@@ -13,7 +14,11 @@ type Restaurant = {
 
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -32,6 +37,18 @@ const RestaurantList: React.FC = () => {
     fetchRestaurants();
   }, []);
 
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredRestaurants(restaurants);
+    } else {
+      setFilteredRestaurants(
+        restaurants.filter((restaurant) =>
+          restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+  }, [searchQuery, restaurants]);
+
   if (loading) {
     return (
       <div className="text-center text-gray-700 mt-10 text-lg font-medium">
@@ -49,11 +66,28 @@ const RestaurantList: React.FC = () => {
             🍴 Discover Our Restaurants
           </h1>
 
-          {restaurants.length === 0 ? (
+          {/* Search Bar */}
+          <div className="mb-8 flex justify-end">
+            <div className="relative w-full max-w-xs">
+              <input
+                type="text"
+                placeholder="Search restaurants"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              />
+              <FaSearch
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
+            </div>
+          </div>
+
+          {filteredRestaurants.length === 0 ? (
             <p className="text-center text-gray-500">No restaurants found.</p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 font-sans">
-              {restaurants.map((restaurant) => (
+              {filteredRestaurants.map((restaurant) => (
                 <div
                   key={restaurant._id}
                   className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
@@ -69,10 +103,10 @@ const RestaurantList: React.FC = () => {
                         {restaurant.name}
                       </h2>
                       <span
-                        className={`text-xs font-medium px-3 py-1 rounded-full ${
+                        className={`text-sm font-medium px-3 py-1 rounded-full ${
                           restaurant.available
-                            ? "bg-green-100 text-green-600"
-                            : "bg-red-100 text-red-500"
+                            ? "bg-green-100 text-green-600  animate-bounce"
+                            : "bg-red-100 text-red-500 animate-pulse"
                         }`}
                       >
                         {restaurant.available ? "Open" : "Closed"}

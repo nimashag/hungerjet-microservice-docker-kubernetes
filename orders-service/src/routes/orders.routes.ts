@@ -17,7 +17,7 @@ router.delete('/:id', authenticate, authorizeRoles("customer"), ctrl.deleteOrder
 router.get('/user/current', authenticate, ctrl.getCurrentUserOrders);
 
 // Get orders for restaurant admin's restaurant
-router.get('/restaurant/current', authenticate, authorizeRoles("restaurantAdmin"), ctrl.getRestaurantOrders);
+//router.get('/restaurant/current', authenticate, authorizeRoles("restaurantAdmin"), ctrl.getRestaurantOrders);
 
 // Update just the order status
 router.patch('/:id/status', authenticate, authorizeRoles("admin", "restaurantAdmin"), ctrl.updateOrderStatus);

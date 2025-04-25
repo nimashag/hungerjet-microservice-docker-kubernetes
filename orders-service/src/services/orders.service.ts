@@ -23,8 +23,6 @@ export const deleteOrder = async (id: string) => {
 
 export const getOrdersByUserId = (userId: string) => Order.find({ userId });
 
-export const getOrdersByRestaurantId = (restaurantId: string) => Order.find({ restaurantId });
-
 export const updateOrderStatus = async (id: string, status: string) => {
   return await Order.findByIdAndUpdate(
     id, 
@@ -42,7 +40,7 @@ export const processOrderPayment = async (id: string, paymentDetails: any) => {
     throw new Error("Order not found");
   }
   
-  if (order.paymentStatus === 'paid') {
+  if (order.paymentStatus === 'Paid') {
     throw new Error("Order is already paid");
   }
   
@@ -50,7 +48,7 @@ export const processOrderPayment = async (id: string, paymentDetails: any) => {
   return await Order.findByIdAndUpdate(
     id,
     { 
-      paymentStatus: 'paid',
+      paymentStatus: 'Paid',
       status: 'Confirmed',
       paymentMethod: paymentDetails.method,
       // You might store transaction ID or other payment reference here

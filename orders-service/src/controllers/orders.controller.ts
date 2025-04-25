@@ -137,28 +137,28 @@ export const getCurrentUserOrders = async (req: AuthenticatedRequest, res: Respo
 };
 
 //check this
-export const getRestaurantOrders = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+// export const getRestaurantOrders = async (req: AuthenticatedRequest, res: Response) => {
+//   try {
+//     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     
-    // In a real implementation, you would get the restaurant ID associated with this admin
-    // This might involve a call to the restaurant-service or checking user metadata
-    const restaurantId = req.user.restaurantId;
+//     // In a real implementation, you would get the restaurant ID associated with this admin
+//     // This might involve a call to the restaurant-service or checking user metadata
+//     const restaurantId = req.user.restaurantId;
     
-    if (!restaurantId) {
-      return res.status(400).json({ message: "No restaurant associated with this account" });
-    }
+//     if (!restaurantId) {
+//       return res.status(400).json({ message: "No restaurant associated with this account" });
+//     }
     
-    console.log(`▶️ Fetching orders for restaurant: ${restaurantId}`);
-    const orders = await OrdersService.getOrdersByRestaurantId(restaurantId);
-    console.log(`Found ${orders.length} orders for restaurant`);
+//     console.log(`▶️ Fetching orders for restaurant: ${restaurantId}`);
+//     const orders = await OrdersService.getOrdersByRestaurantId(restaurantId);
+//     console.log(`Found ${orders.length} orders for restaurant`);
     
-    res.json(orders);
-  } catch (err) {
-    console.error("Error getting restaurant orders:", err);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-};
+//     res.json(orders);
+//   } catch (err) {
+//     console.error("Error getting restaurant orders:", err);
+//     res.status(500).json({ message: "Something went wrong" });
+//   }
+// };
 
 export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {

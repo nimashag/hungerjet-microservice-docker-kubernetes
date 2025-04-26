@@ -1,17 +1,19 @@
-import { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import gsap from 'gsap';
+import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import gsap from "gsap";
 
 const LoginAdmin = () => {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -19,18 +21,18 @@ const LoginAdmin = () => {
     const tempErrors: { email?: string; password?: string } = {};
 
     if (!form.email.trim()) {
-      tempErrors.email = 'Email is required';
+      tempErrors.email = "Email is required";
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = 'Invalid email address';
+      tempErrors.email = "Invalid email address";
       valid = false;
     }
 
     if (!form.password.trim()) {
-      tempErrors.password = 'Password is required';
+      tempErrors.password = "Password is required";
       valid = false;
     } else if (form.password.length < 6) {
-      tempErrors.password = 'Password must be at least 6 characters';
+      tempErrors.password = "Password must be at least 6 characters";
       valid = false;
     }
 
@@ -43,17 +45,20 @@ const LoginAdmin = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/login', form);
+      const res = await axios.post(
+        "http://localhost:31000/api/auth/login",
+        form
+      );
 
-      if (res.data.user.role === 'appAdmin') {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        navigate('/admin-dashboard');
+      if (res.data.user.role === "appAdmin") {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        navigate("/admin-dashboard");
       } else {
-        alert('Access denied: Not a system administrator');
+        alert("Access denied: Not a system administrator");
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Login failed');
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -61,15 +66,15 @@ const LoginAdmin = () => {
     gsap.to(liquidRef.current, {
       x: 0,
       duration: 0.5,
-      ease: 'power2.out'
+      ease: "power2.out",
     });
   };
 
   const handleMouseLeave = () => {
     gsap.to(liquidRef.current, {
-      x: '-100%',
+      x: "-100%",
       duration: 0.5,
-      ease: 'power2.inOut'
+      ease: "power2.inOut",
     });
   };
 
@@ -94,10 +99,12 @@ const LoginAdmin = () => {
                 value={form.email}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
-                  errors.email ? 'border-red-500' : 'focus:ring-green-500'
+                  errors.email ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -108,10 +115,12 @@ const LoginAdmin = () => {
                 value={form.password}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
-                  errors.password ? 'border-red-500' : 'focus:ring-green-500'
+                  errors.password ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
 
             <div className="text-right text-sm text-green-600 hover:underline cursor-pointer">
@@ -130,7 +139,7 @@ const LoginAdmin = () => {
                 <div
                   ref={liquidRef}
                   className="absolute top-0 left-0 h-full w-full bg-green-500 rounded-full z-10"
-                  style={{ transform: 'translateX(-100%)' }}
+                  style={{ transform: "translateX(-100%)" }}
                 />
               </button>
             </div>

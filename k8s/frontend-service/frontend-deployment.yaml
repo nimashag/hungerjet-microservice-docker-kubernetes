@@ -18,3 +18,8 @@ spec:
           imagePullPolicy: IfNotPresent # Use the image if it exists locally before trying to pull from Docker Hub
           ports:
             - containerPort: 80
+          env:
+            - name: ORDERS_URL
+              value: "http://localhost:31000"
+            - name: RESTAURANTS_URL
+              value: "http://localhost:31000"

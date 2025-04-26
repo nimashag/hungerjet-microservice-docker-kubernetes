@@ -27,7 +27,7 @@ const RestaurantMenu: React.FC = () => {
     const fetchMenuItems = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/restaurants/${restaurantId}/menu-items`
+          `http://localhost:31000/api/restaurants/${restaurantId}/menu-items`
         );
         const items: MenuItem[] = response.data;
         setMenuItems(items);
@@ -143,7 +143,7 @@ const RestaurantMenu: React.FC = () => {
                       className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
                     >
                       <img
-                        src={`http://localhost:3001/uploads/${item.image}`}
+                        src={`http://localhost:31000/uploads/${item.image}`}
                         alt={item.name}
                         className="w-full h-52 object-cover rounded-t-2xl"
                       />

@@ -7,7 +7,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = "http://localhost:31000";
 
 interface Restaurant {
   _id: string;
@@ -202,7 +202,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient from-gray-50 to-gray-200 p-4">
         <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6 md:p-10 space-y-6">
           <div className="flex items-center justify-between flex-wrap">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
               🍽️ Restaurant Details
             </h1>
             <div className="flex gap-4 mt-4 md:mt-0">
@@ -231,7 +231,7 @@ export const AdminDashboard: React.FC = () => {
                 </h2> */}
                 {restaurant.image && (
                   <img
-                    src={`http://localhost:3001/uploads/${restaurant.image}`}
+                    src={`http://localhost:31000/uploads/${restaurant.image}`}
                     alt="restaurant"
                     className="rounded-2xl w-full max-w-full object-cover shadow-md"
                   />

@@ -46,7 +46,7 @@ const LoginRestaurant = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3003/api/auth/login",
+        "http://localhost:31000/api/auth/login",
         form
       );
       console.log(`Login response: ${JSON.stringify(res)}`);

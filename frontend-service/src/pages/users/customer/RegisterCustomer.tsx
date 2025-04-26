@@ -1,14 +1,14 @@
-import { useState, useRef } from 'react';
-import axios from 'axios';
-import gsap from 'gsap';
+import { useState, useRef } from "react";
+import axios from "axios";
+import gsap from "gsap";
 
 const RegisterCustomer = () => {
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -16,7 +16,7 @@ const RegisterCustomer = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' }); // Clear error on type
+    setErrors({ ...errors, [e.target.name]: "" }); // Clear error on type
   };
 
   const validateForm = () => {
@@ -24,29 +24,29 @@ const RegisterCustomer = () => {
     let isValid = true;
 
     if (!form.name.trim()) {
-      tempErrors.name = 'Name is required';
+      tempErrors.name = "Name is required";
       isValid = false;
     }
     if (!form.email.trim()) {
-      tempErrors.email = 'Email is required';
+      tempErrors.email = "Email is required";
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = 'Invalid email';
+      tempErrors.email = "Invalid email";
       isValid = false;
     }
     if (!form.password.trim()) {
-      tempErrors.password = 'Password is required';
+      tempErrors.password = "Password is required";
       isValid = false;
     } else if (form.password.length < 6) {
-      tempErrors.password = 'Password must be at least 6 characters';
+      tempErrors.password = "Password must be at least 6 characters";
       isValid = false;
     }
     if (!form.phone.trim()) {
-      tempErrors.phone = 'Phone is required';
+      tempErrors.phone = "Phone is required";
       isValid = false;
     }
     if (!form.address.trim()) {
-      tempErrors.address = 'Address is required';
+      tempErrors.address = "Address is required";
       isValid = false;
     }
 
@@ -60,13 +60,13 @@ const RegisterCustomer = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/register', {
+      const res = await axios.post("http://localhost:31000/api/auth/register", {
         ...form,
-        role: 'customer',
+        role: "customer",
       });
-      alert(res.data.message || 'Registered successfully!');
+      alert(res.data.message || "Registered successfully!");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Registration failed');
+      alert(err.response?.data?.message || "Registration failed");
     }
   };
 
@@ -74,15 +74,15 @@ const RegisterCustomer = () => {
     gsap.to(liquidRef.current, {
       x: 0,
       duration: 0.5,
-      ease: 'power2.out',
+      ease: "power2.out",
     });
   };
 
   const handleMouseLeave = () => {
     gsap.to(liquidRef.current, {
-      x: '-100%',
+      x: "-100%",
       duration: 0.5,
-      ease: 'power2.inOut',
+      ease: "power2.inOut",
     });
   };
 
@@ -108,16 +108,16 @@ const RegisterCustomer = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {['name', 'email', 'password', 'phone', 'address'].map((field) => (
+            {["name", "email", "password", "phone", "address"].map((field) => (
               <div key={field}>
                 <input
-                  type={field === 'password' ? 'password' : 'text'}
+                  type={field === "password" ? "password" : "text"}
                   name={field}
                   placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                   value={(form as any)[field]}
                   onChange={handleChange}
                   className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                    errors[field] ? 'border-red-500' : 'focus:ring-green-500'
+                    errors[field] ? "border-red-500" : "focus:ring-green-500"
                   }`}
                 />
                 {errors[field] && (
@@ -138,15 +138,18 @@ const RegisterCustomer = () => {
                 <div
                   ref={liquidRef}
                   className="absolute top-0 left-0 h-full w-full bg-green-500 rounded-full z-10"
-                  style={{ transform: 'translateX(-100%)' }}
+                  style={{ transform: "translateX(-100%)" }}
                 />
               </button>
             </div>
           </form>
 
           <p className="text-center text-sm mt-6">
-            Already have an account?{' '}
-            <a href="/login/customer" className="text-green-600 hover:underline">
+            Already have an account?{" "}
+            <a
+              href="/login/customer"
+              className="text-green-600 hover:underline"
+            >
               Login here
             </a>
           </p>

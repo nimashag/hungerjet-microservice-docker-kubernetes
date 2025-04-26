@@ -34,7 +34,7 @@ const RestaurantOrders = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3001/api/restaurants/my",
+        "http://localhost:31000/api/restaurants/my",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -49,7 +49,7 @@ const RestaurantOrders = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3002/api/orders/restaurant/${restaurantId}`
+        `http://localhost:31000/api/orders/restaurant/${restaurantId}`
       );
       setOrders(response.data);
     } catch (error) {
@@ -84,7 +84,7 @@ const RestaurantOrders = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:3002/api/orders/${orderId}`,
+        `http://localhost:31000/api/orders/${orderId}`,
         { status: newStatus },
         {
           headers: {

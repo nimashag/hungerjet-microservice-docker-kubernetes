@@ -53,7 +53,7 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3001/api/restaurants/my",
+        "http://localhost:31000/api/restaurants/my",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -68,7 +68,7 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3001/api/restaurants/my/menu-items",
+        "http://localhost:31000/api/restaurants/my/menu-items",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +154,7 @@ const MenuItems = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:3001/api/restaurants/${restaurant._id}/menu-items`,
+        `http://localhost:31000/api/restaurants/${restaurant._id}/menu-items`,
         formData,
         {
           headers: {
@@ -189,7 +189,7 @@ const MenuItems = () => {
       try {
         const token = localStorage.getItem("token");
         await axios.delete(
-          `http://localhost:3001/api/restaurants/my/menu-items/${id}`,
+          `http://localhost:31000/api/restaurants/my/menu-items/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -252,7 +252,7 @@ const MenuItems = () => {
 
     try {
       await axios.put(
-        `http://localhost:3001/api/restaurants/my/menu-items/${editingItem._id}`,
+        `http://localhost:31000/api/restaurants/my/menu-items/${editingItem._id}`,
         formData,
         {
           headers: {
@@ -288,7 +288,9 @@ const MenuItems = () => {
   return (
     <AdminLayout>
       <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Restaurant Menu-Items</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">
+          Restaurant Menu-Items
+        </h1>
         <div className="flex justify-between items-center flex-wrap gap-4 mb-4">
           <button
             onClick={() => setShowCreateModal(true)}
@@ -359,7 +361,7 @@ const MenuItems = () => {
                   <td className="px-4 py-3">
                     {item.image ? (
                       <img
-                        src={`http://localhost:3001/uploads/${item.image}`}
+                        src={`http://localhost:31000/uploads/${item.image}`}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />

@@ -58,7 +58,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch restaurant by user ID
         const restaurantRes = await axios.get(
-          "http://localhost:3001/api/restaurants/my",
+          "http://localhost:31000/api/restaurants/my",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -68,7 +68,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch menu items by user ID
         const menuItemsRes = await axios.get(
-          "http://localhost:3001/api/restaurants/my/menu-items",
+          "http://localhost:31000/api/restaurants/my/menu-items",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -78,7 +78,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch orders by restaurant ID
         const ordersRes = await axios.get(
-          `http://localhost:3002/api/orders/restaurant/${restaurantData._id}`,
+          `http://localhost:31000/api/orders/restaurant/${restaurantData._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

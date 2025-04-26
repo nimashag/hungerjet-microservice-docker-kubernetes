@@ -223,7 +223,7 @@ const RestaurantOrders = () => {
                     ))}
                   </td>
                   <td className="px-6 py-4 font-medium text-neutral-600">
-                    ${order.totalAmount.toFixed(2)}
+                    ${order.totalAmount}
                   </td>
                   <td className="px-6 py-4 font-medium text-neutral-600">
                     <span

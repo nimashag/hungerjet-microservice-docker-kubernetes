@@ -1,11 +1,13 @@
+import { Types } from "mongoose";
 import { Order } from '../models/order.model';
 
 export const createOrder = (data: any, userId: string) => Order.create({ ...data, userId });
 
-export const getAllOrders = () => Order.find();
-
 export const getOrderById = (id: string) => Order.findById(id);
 
+export const getAllOrders = () => Order.find();
+
+//restaurantAdmin
 export const getOrdersByRestaurantId = (restaurantId: string) => {
   return Order.find({ restaurantId });
 };

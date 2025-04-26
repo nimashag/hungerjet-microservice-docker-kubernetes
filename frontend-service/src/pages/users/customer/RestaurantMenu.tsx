@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { FaShoppingCart } from "react-icons/fa";
+import { useCart } from "../../../contexts/CartContext";
 
 type MenuItem = {
   _id: string;
@@ -22,6 +23,8 @@ const RestaurantMenu: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -80,6 +83,16 @@ const RestaurantMenu: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
+    const cartItem = {
+      menuItemId: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+    };
+  
+    addToCart(cartItem);
+  
+    console.log("Added to cart:", cartItem); // 👈 Logs the cart item details
     alert(`🛒 ${item.name} added to cart!`);
   };
 

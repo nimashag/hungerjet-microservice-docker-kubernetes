@@ -1,51 +1,58 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import OrderCard from '../../../components/OrderCard';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Navbar from "../../../components/Navbar"; // adjust path if needed
+import { useNavigate } from "react-router-dom";
 
-type OrderItem = {
+interface OrderItem {
+  menuItemId: string;
   name: string;
   quantity: number;
   price: number;
-};
+}
 
-type Order = {
+interface Order {
   _id: string;
   restaurantId: string;
-  restaurantName?: string; // Optional if coming from backend
   items: OrderItem[];
   status: string;
   totalAmount: number;
-  paymentStatus: string;
-  paymentMethod: string;
+  deliveryAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
   createdAt: string;
-};
+}
 
-const OrderList = () => {
+const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        setError('You must be logged in to view your orders.');
-        setLoading(false);
-        return;
-      }
-
       try {
-        const res = await axios.get('http://localhost:3002/api/orders/user/current', {
+        if (!token) {
+          setError("Token missing.");
+          return;
+        }
+
+        const res = await axios.get("http://localhost:3002/api/orders", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         setOrders(res.data);
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Error fetching orders');
+      } catch (err) {
+        console.error("Failed to fetch orders", err);
+        setError("Failed to load orders. Try again.");
+      } finally {
         setLoading(false);
       }
     };
@@ -53,65 +60,104 @@ const OrderList = () => {
     fetchOrders();
   }, []);
 
-  const handlePayClick = (orderId: string) => {
-    // Logic to initiate payment (e.g., redirect to a payment gateway)
-    console.log(`Initiating payment for order: ${orderId}`);
-  };
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="p-6 text-center">Loading orders...</div>
+      </>
+    );
+  }
 
-  if (loading) return <div className="text-center mt-10">Loading orders...</div>;
-  if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="p-6 text-center text-red-500">{error}</div>
+      </>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <div className="p-6 text-center">No orders found.</div>
+      </>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Orders</h1>
-      {orders.length === 0 ? (
-        <p className="text-center text-gray-600">You have no orders yet.</p>
-      ) : (
-        <div className="space-y-6">
+    <>
+      <Navbar />
+      <div className="max-w-6xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-center">📦 All Orders</h1>
+
+        <div className="grid gap-6">
           {orders.map((order) => (
-            <div key={order._id} className="flex space-x-6 mb-6">
-              <div className="flex-1">
-                <OrderCard
-                  order={{
-                    id: order._id,
-                    items: order.items,
-                    totalAmount: order.totalAmount,
-                    restaurantName: order.restaurantName || 'Restaurant',
-                  }}
-                />
-              </div>
-              <div className="flex-none w-64 p-4 bg-gray-100 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Total Amount</span>
-                    <span className="font-semibold">${order.totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Payment Status</span>
-                    <span
-                      className={`font-semibold ${order.paymentStatus === 'Paid' ? 'text-green-500' : 'text-red-500'}`}
-                    >
-                      {order.paymentStatus}
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    {order.paymentStatus !== 'Paid' && (
-                      <button
-                        className="w-full py-2 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                        onClick={() => handlePayClick(order._id)}
-                      >
-                        Pay Now
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+            <div
+            key={order._id}
+            className="relative bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Order ID: {order._id}</h2>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  order.status === "Cancelled"
+                    ? "bg-red-100 text-red-700"
+                    : order.status === "Delivered"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {order.status}
+              </span>
             </div>
+          
+            <div className="mb-4">
+              <p><strong>Restaurant ID:</strong> {order.restaurantId}</p>
+              <p><strong>Total Amount:</strong> ${order.totalAmount.toFixed(2)}</p>
+            </div>
+          
+            <div className="mb-4">
+              <h3 className="font-semibold">Items:</h3>
+              <ul className="list-disc list-inside ml-4">
+                {order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.name} (x{item.quantity}) - ${item.price.toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          
+            <div className="mb-4">
+              <h3 className="font-semibold">Delivery Address:</h3>
+              <p>
+                {order.deliveryAddress?.street}, {order.deliveryAddress?.city},{" "}
+                {order.deliveryAddress?.state} {order.deliveryAddress?.zipCode},{" "}
+                {order.deliveryAddress?.country}
+              </p>
+            </div>
+          
+            <p className="text-sm text-gray-500">
+              Ordered on: {new Date(order.createdAt).toLocaleString()}
+            </p>
+          
+            {/* 🟣 Add Purple Button If Pending */}
+            {order.status === "Pending" && (
+              <button
+                onClick={() => navigate(`/order/${order._id}`)}
+                className="absolute bottom-4 right-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-lg transition"
+              >
+                ➔
+              </button>
+            )}
+          </div>
+          
           ))}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 

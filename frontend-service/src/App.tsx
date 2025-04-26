@@ -16,10 +16,13 @@ import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import Home from './pages/users/customer/CustomerHome';
 import RestaurantList from './pages/users/customer/RestaurantList';
 import RestaurantMenu from './pages/users/customer/RestaurantMenu';
+import OrderList from './pages/users/customer/OrderList';
+import Cart from './pages/users/customer/Cart';
+import Order from './pages/users/customer/Order';
 
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
-import OrderList from './pages/users/customer/OrderList';
+
 import AdminDashboard from './pages/users/admin/AdminDashboard';
 import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
 import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
@@ -58,10 +61,12 @@ function App() {
 
                 {/* Customer Routes */}
                 <Route path="/" element={<Home />} />
+                <Route path="/order/:orderId" element={<Order />}/>
                 <Route path="/my-orders" element={<OrderList />}/>
                 <Route path="/customer-home" element={<Home />} />
                 <Route path="/restaurants" element={<RestaurantList />} />
                 <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
+                <Route path="/cart" element={<Cart />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />

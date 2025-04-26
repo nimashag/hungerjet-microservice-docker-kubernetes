@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as OrdersService from "../services/orders.service";
 import { AuthenticatedRequest } from "../middlewares/auth";
+import { fetchMenuItems, fetchRestaurant } from "../api/restaurant.api";
 
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -9,8 +10,8 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
     const {
       items,
       status,
-      totalAmount,
       deliveryAddress,
+      totalAmount,
       paymentStatus,
       paymentMethod,
       specialInstructions,
@@ -19,12 +20,18 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
 
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
+    // 🔗 Fetch menu items from the restaurant service
+    const menuItems = await fetchMenuItems(restaurantId);
+    if (!menuItems || menuItems.length === 0) {
+      return res.status(400).json({ message: "No menu items found for this restaurant." });
+    }
+
     const order = await OrdersService.createOrder(
       {
         items,
         status,
-        totalAmount,
         deliveryAddress,
+        totalAmount,
         paymentStatus,
         paymentMethod,
         specialInstructions,
@@ -41,6 +48,17 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+export const getOne = async (req: Request, res: Response) => {
+  console.log("▶️ Fetching order with ID:", req.params.id);
+  const order = await OrdersService.getOrderById(req.params.id);
+  if (!order) {
+    console.warn("Order not found:", req.params.id);
+  } else {
+    console.log("Order found:", order._id);
+  }
+  res.json(order);
+};
+
 export const getAll = async (_req: Request, res: Response) => {
   try {
     console.log("▶️ Fetching all orders");
@@ -53,17 +71,53 @@ export const getAll = async (_req: Request, res: Response) => {
   }
 };
 
-export const getOne = async (req: Request, res: Response) => {
-  console.log("▶️ Fetching order with ID:", req.params.id);
-  const order = await OrdersService.getOrderById(req.params.id);
-  if (!order) {
-    console.warn("Order not found:", req.params.id);
-  } else {
-    console.log("Order found:", order._id);
+// Update delivery address
+export const updateDeliveryAddress = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { deliveryAddress } = req.body;
+
+    if (!deliveryAddress) {
+      return res.status(400).json({ message: "Delivery address is required" });
+    }
+
+    const updatedOrder = await OrdersService.updateOrder(id, { deliveryAddress });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error("Error updating delivery address:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  res.json(order);
 };
 
+// Update special instructions
+export const updateSpecialInstructions = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { specialInstructions } = req.body;
+
+    if (specialInstructions === undefined) {
+      return res.status(400).json({ message: "Special instructions are required" });
+    }
+
+    const updatedOrder = await OrdersService.updateOrder(id, { specialInstructions });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error("Error updating special instructions:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//restaurantAdmin
 export const getByRestaurantId = async (req: Request, res: Response) => {
   try {
     const { restaurantId } = req.params;
@@ -82,6 +136,7 @@ export const getByRestaurantId = async (req: Request, res: Response) => {
   }
 };
 
+//restaurantAdmin
 export const update = async (req: Request, res: Response) => {
   try {
     console.log("▶️ Updating order ID:", req.params.id);
@@ -135,30 +190,6 @@ export const getCurrentUserOrders = async (req: AuthenticatedRequest, res: Respo
     res.status(500).json({ message: "Something went wrong" });
   }
 };
-
-//check this
-// export const getRestaurantOrders = async (req: AuthenticatedRequest, res: Response) => {
-//   try {
-//     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-    
-//     // In a real implementation, you would get the restaurant ID associated with this admin
-//     // This might involve a call to the restaurant-service or checking user metadata
-//     const restaurantId = req.user.restaurantId;
-    
-//     if (!restaurantId) {
-//       return res.status(400).json({ message: "No restaurant associated with this account" });
-//     }
-    
-//     console.log(`▶️ Fetching orders for restaurant: ${restaurantId}`);
-//     const orders = await OrdersService.getOrdersByRestaurantId(restaurantId);
-//     console.log(`Found ${orders.length} orders for restaurant`);
-    
-//     res.json(orders);
-//   } catch (err) {
-//     console.error("Error getting restaurant orders:", err);
-//     res.status(500).json({ message: "Something went wrong" });
-//   }
-// };
 
 export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {

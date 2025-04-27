@@ -24,51 +24,62 @@ import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
 import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
 import AdminDrivers from './pages/users/admin/UserTables/AdminDrivers';
 import AdminAnalytics from './pages/users/admin/AdminAnalytics';
+import DriverProfile from './pages/users/delivery/DriverProfile';
+import DriverDashboard from './pages/users/delivery/DriverDashboard';
+
 
 function App() {
     return (
-        <BrowserRouter>
+      <BrowserRouter>
         {/* 
             <nav>
                 <Link to="/">Restaurants</Link> | <Link to="/orders">Orders</Link>
             </nav>
         */}
-            <Routes>
+        <Routes>
+          {/* Restaurant routes */}
+          <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
+          <Route path="/restaurant-menu" element={<MenuItems />} />
+          <Route path="/restaurant-orders" element={<RestaurantOrders />} />
+          <Route
+            path="/restaurant-analytics"
+            element={<RestaurantAnalytics />}
+          />
 
-                {/* Restaurant routes */}
-                <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
-                <Route path="/restaurant-menu" element={<MenuItems />} />
-                <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
-                <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} />
+          {/* Orders routes */}
+          <Route path="/orders" element={<Orders />} />
 
-                {/* Orders routes */}
-                <Route path="/orders" element={<Orders />} />
+          {/* Login routes */}
+          <Route path="/login/customer" element={<LoginCustomer />} />
+          <Route path="/login/admin" element={<LoginAdmin />} />
+          <Route path="/login/restaurant" element={<LoginRestaurant />} />
+          <Route path="/login/delivery" element={<LoginDelivery />} />
 
-                {/* Login routes */}
-                <Route path="/login/customer" element={<LoginCustomer />} />
-                <Route path="/login/admin" element={<LoginAdmin />} />
-                <Route path="/login/restaurant" element={<LoginRestaurant />} />
-                <Route path="/login/delivery" element={<LoginDelivery />} />
+          {/* SignUp routes */}
+          <Route path="/register/customer" element={<RegisterCustomer />} />
+          <Route path="/register/delivery" element={<RegisterDelivery />} />
+          <Route path="/register/restaurant" element={<RegisterRestaurant />} />
 
-                {/* SignUp routes */}
-                <Route path="/register/customer" element={<RegisterCustomer />} />
-                <Route path="/register/delivery" element={<RegisterDelivery />} />
-                <Route path="/register/restaurant" element={<RegisterRestaurant />} />
+          {/* Customer Routes */}
+          <Route path="/customer-home" element={<Home />} />
+          <Route path="/restaurants" element={<RestaurantList />} />
+          <Route
+            path="/restaurants/:restaurantId"
+            element={<RestaurantMenu />}
+          />
 
-                {/* Customer Routes */}
-                <Route path="/customer-home" element={<Home />} />
-                <Route path="/restaurants" element={<RestaurantList />} />
-                <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
-
-                {/* Admin Routes */}
-                <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/customers" element={<AdminCustomers />} />
-                <Route path='/admin/restaurants' element={<AdminRestaurant />} />
-                <Route path='/admin/drivers' element={<AdminDrivers />} />
-                <Route path='/admin/analytics' element={<AdminAnalytics />} />
-
-            </Routes>
-        </BrowserRouter>
+          {/* Admin Routes */}
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
+          <Route path="/admin/restaurants" element={<AdminRestaurant />} />
+          <Route path="/admin/drivers" element={<AdminDrivers />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        
+          <Route path="/driver/profile" element={<DriverProfile />} />
+          <Route path="/driver/dashboard" element={<DriverDashboard />} />
+        
+        </Routes>
+      </BrowserRouter>
     );
 }
 

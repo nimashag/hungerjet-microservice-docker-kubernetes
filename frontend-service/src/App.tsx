@@ -5,8 +5,6 @@ import MenuItems from "./pages/users/restaurant/MenuItems";
 import RestaurantOrders from "./pages/users/restaurant/RestaurantOrdersPage";
 import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
 
-import Orders from './pages/Orders';
-
 import PaymentPage from './pages/PaymentPage';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -46,9 +44,6 @@ function App() {
                 <Route path="/restaurant-menu" element={<MenuItems />} />
                 <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
                 <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} />
-
-                {/* Orders routes */}
-                <Route path="/orders" element={<Orders />} />
 
                 {/* Login routes */}
                 <Route path="/login/customer" element={<LoginCustomer />} />

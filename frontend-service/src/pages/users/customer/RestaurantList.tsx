@@ -3,6 +3,7 @@ import axios from "axios";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { FaSearch } from "react-icons/fa";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 type Restaurant = {
   _id: string;
@@ -11,12 +12,6 @@ type Restaurant = {
   image?: string;
   available: boolean;
 };
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);

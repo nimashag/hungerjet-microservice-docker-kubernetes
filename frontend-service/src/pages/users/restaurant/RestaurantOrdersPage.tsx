@@ -4,6 +4,7 @@ import AdminLayout from "./RestaurantAdminLayout";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { motion } from "framer-motion";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 interface Restaurant {
   _id: string;
@@ -24,12 +25,6 @@ interface Order {
   createdAt: string;
   items: OrderItem[];
 }
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RestaurantOrders = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);

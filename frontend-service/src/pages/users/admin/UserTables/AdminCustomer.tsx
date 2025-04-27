@@ -4,6 +4,7 @@ import AdminLayout from "../AdminLayout";
 import { CheckCircle, Trash2, Search, Filter, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../../api";
 
 type Customer = {
   _id: string;
@@ -14,12 +15,6 @@ type Customer = {
   isApproved?: boolean;
   role?: string;
 };
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);

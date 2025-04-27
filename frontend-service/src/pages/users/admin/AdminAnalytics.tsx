@@ -14,6 +14,7 @@ import {
   DoughnutController,
 } from "chart.js";
 import { Users, ShieldCheck, AlertCircle } from "lucide-react";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 ChartJS.register(
   CategoryScale,
@@ -31,12 +32,6 @@ type User = {
   isApproved: boolean;
   createdAt: string;
 };
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 
 const AdminAnalytics = () => {

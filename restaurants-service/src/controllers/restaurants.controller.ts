@@ -99,6 +99,25 @@ export const toggleAvailability = async (req: Request, res: Response) => {
   res.json(updated);
 };
 
+export const remove = async (req: Request, res: Response) => {
+  try {
+    console.log("[deleteRestaurant] ▶️ Deleting restaurant ID:", req.params.id);
+
+    const deleted = await restaurantsService.deleteRestaurant(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+
+    console.log("✅ Deleted restaurant");
+    res.status(204).send(); // No content
+  } catch (err) {
+    console.error("Error deleting restaurant:", err);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+
 export const addMenuItem = async (req: AuthenticatedRequest, res: Response) => {
   console.log(
     "[addMenuItem]▶️ Adding menu item for restaurant ID:",
@@ -145,7 +164,22 @@ export const getOneMenuItem = async (req: Request, res: Response) => {
     res.json(item);
   };
   
-
+export const getMenuItemsByUser = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+  
+      console.log("[getMenuItemsByUser]▶️ Fetching menu items for user ID:", req.user.id);
+      const items = await restaurantsService.getMenuItemsByUser(req.user.id);
+  
+      console.log(`✅ Found ${items.length} menu items for user`);
+      res.json(items);
+    } catch (err) {
+      console.error("Error fetching menu items by user:", err);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+};
+  
+  
 export const updateMenuItem = async (req: Request, res: Response) => {
     try {
       console.log("[updateMenuItem]▶️ Updating menu item ID:", req.params.itemId);

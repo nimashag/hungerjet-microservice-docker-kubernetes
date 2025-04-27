@@ -26,12 +26,18 @@ export const updateRestaurant = async (id: string, data: any) => {
   return updatedRestaurant;
 };
 
+export const deleteRestaurant = (id: string) =>
+  Restaurant.findByIdAndDelete(id);
+
+
 export const addMenuItem = (restaurantId: string, item: any) =>
   MenuItem.create({ ...item, restaurantId });
 
 export const getOneMenuItem = (itemId: string) =>
     MenuItem.findById(itemId);
   
+export const getMenuItemsByUser = (userId: string) =>
+  MenuItem.find({ userId });
 
 export const listMenuItems = (restaurantId: string) =>
   MenuItem.find({ restaurantId });

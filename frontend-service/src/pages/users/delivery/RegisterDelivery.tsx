@@ -1,16 +1,22 @@
-import { useState, useRef } from 'react';
-import axios from 'axios';
-import gsap from 'gsap';
+import { useState, useRef } from "react";
+import axios from "axios";
+import gsap from "gsap";
+
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RegisterDelivery = () => {
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    vehicleType: '',
-    licenseNumber: ''
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    vehicleType: "",
+    licenseNumber: "",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -18,29 +24,37 @@ const RegisterDelivery = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
     const tempErrors: { [key: string]: string } = {};
     let isValid = true;
 
-    const requiredFields = ['name', 'email', 'password', 'phone', 'address', 'vehicleType', 'licenseNumber'];
+    const requiredFields = [
+      "name",
+      "email",
+      "password",
+      "phone",
+      "address",
+      "vehicleType",
+      "licenseNumber",
+    ];
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       if (!form[field as keyof typeof form].trim()) {
-        tempErrors[field] = 'This field is required';
+        tempErrors[field] = "This field is required";
         isValid = false;
       }
     });
 
     if (form.password.length < 6) {
-      tempErrors.password = 'Password must be at least 6 characters';
+      tempErrors.password = "Password must be at least 6 characters";
       isValid = false;
     }
 
     if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = 'Invalid email';
+      tempErrors.email = "Invalid email";
       isValid = false;
     }
 
@@ -53,15 +67,15 @@ const RegisterDelivery = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/register', {
+      const res = await axios.post(`${userUrl}/api/auth/register`, {
         ...form,
-        role: 'deliveryPersonnel'
+        role: "deliveryPersonnel",
       });
 
-      alert(res.data.message || 'Registered successfully!');
+      alert(res.data.message || "Registered successfully!");
       // Add Home HerRe ?//////////////////////////////////
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Registration failed');
+      alert(err.response?.data?.message || "Registration failed");
     }
   };
 
@@ -69,15 +83,15 @@ const RegisterDelivery = () => {
     gsap.to(liquidRef.current, {
       x: 0,
       duration: 0.5,
-      ease: 'power2.out'
+      ease: "power2.out",
     });
   };
 
   const handleMouseLeave = () => {
     gsap.to(liquidRef.current, {
-      x: '-100%',
+      x: "-100%",
       duration: 0.5,
-      ease: 'power2.inOut'
+      ease: "power2.inOut",
     });
   };
 
@@ -104,27 +118,31 @@ const RegisterDelivery = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {[
-              { name: 'name', placeholder: 'Full Name' },
-              { name: 'email', placeholder: 'Email' },
-              { name: 'password', placeholder: 'Password', type: 'password' },
-              { name: 'phone', placeholder: 'Phone' },
-              { name: 'address', placeholder: 'Address' },
-              { name: 'vehicleType', placeholder: 'Vehicle Type (e.g. Bike)' },
-              { name: 'licenseNumber', placeholder: 'License Number' }
-            ].map(field => (
+              { name: "name", placeholder: "Full Name" },
+              { name: "email", placeholder: "Email" },
+              { name: "password", placeholder: "Password", type: "password" },
+              { name: "phone", placeholder: "Phone" },
+              { name: "address", placeholder: "Address" },
+              { name: "vehicleType", placeholder: "Vehicle Type (e.g. Bike)" },
+              { name: "licenseNumber", placeholder: "License Number" },
+            ].map((field) => (
               <div key={field.name}>
                 <input
-                  type={field.type || 'text'}
+                  type={field.type || "text"}
                   name={field.name}
                   placeholder={field.placeholder}
                   value={form[field.name as keyof typeof form]}
                   onChange={handleChange}
                   className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                    errors[field.name] ? 'border-red-500' : 'focus:ring-green-500'
+                    errors[field.name]
+                      ? "border-red-500"
+                      : "focus:ring-green-500"
                   }`}
                 />
                 {errors[field.name] && (
-                  <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[field.name]}
+                  </p>
                 )}
               </div>
             ))}
@@ -141,15 +159,18 @@ const RegisterDelivery = () => {
                 <div
                   ref={liquidRef}
                   className="absolute top-0 left-0 h-full w-full bg-green-500 rounded-full z-10"
-                  style={{ transform: 'translateX(-100%)' }}
+                  style={{ transform: "translateX(-100%)" }}
                 />
               </button>
             </div>
           </form>
 
           <p className="text-center text-sm mt-6">
-            Already registered?{' '}
-            <a href="/login/delivery" className="text-green-600 hover:underline">
+            Already registered?{" "}
+            <a
+              href="/login/delivery"
+              className="text-green-600 hover:underline"
+            >
               Login here
             </a>
           </p>

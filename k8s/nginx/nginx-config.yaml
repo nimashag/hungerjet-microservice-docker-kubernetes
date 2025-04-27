@@ -17,6 +17,11 @@ data:
         proxy_pass http://restaurants-service;
       } 
 
+      # Proxy uploads routes to restaurants backend service
+      location /uploads {
+        proxy_pass http://restaurants-service;
+      } 
+
       # Proxy users API routes to users backend service
       location /api/auth {
         proxy_pass http://users-service;
@@ -26,4 +31,9 @@ data:
       location /api/delivery {
         proxy_pass http://delivery-service;
       }  
+
+      # Proxy React app routes to frontend service
+      location / {
+        proxy_pass http://frontend-service;
+      }
     }

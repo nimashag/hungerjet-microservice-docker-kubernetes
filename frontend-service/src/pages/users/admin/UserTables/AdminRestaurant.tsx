@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import AdminLayout from '../AdminLayout';
-import { CheckCircle, Trash2, Search, Filter } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import AdminLayout from "../AdminLayout";
+import { CheckCircle, Trash2, Search, Filter } from "lucide-react";
 
 type RestaurantAdmin = {
   _id: string;
@@ -13,67 +13,85 @@ type RestaurantAdmin = {
   role?: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 const AdminRestaurant = () => {
-  const [restaurantAdmins, setRestaurantAdmins] = useState<RestaurantAdmin[]>([]);
+  const [restaurantAdmins, setRestaurantAdmins] = useState<RestaurantAdmin[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState<
+    "all" | "approved" | "pending"
+  >("all");
 
   const fetchRestaurantAdmins = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:3003/api/auth/all', {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${userUrl}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const filtered = res.data.filter((user: RestaurantAdmin) => user.role === 'restaurantAdmin');
+      const filtered = res.data.filter(
+        (user: RestaurantAdmin) => user.role === "restaurantAdmin"
+      );
       setRestaurantAdmins(filtered);
     } catch (err: any) {
-      console.error('Failed to fetch restaurant admins:', err);
-      setError('Failed to load restaurant admin data.');
+      console.error("Failed to fetch restaurant admins:", err);
+      setError("Failed to load restaurant admin data.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this restaurant admin?')) return;
+    if (
+      !window.confirm("Are you sure you want to delete this restaurant admin?")
+    )
+      return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3003/api/auth/${id}`, {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${userUrl}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRestaurantAdmins(prev => prev.filter(admin => admin._id !== id));
+      setRestaurantAdmins((prev) => prev.filter((admin) => admin._id !== id));
     } catch {
-      alert('Failed to delete user');
+      alert("Failed to delete user");
     }
   };
 
   const handleApprove = async (id: string) => {
-    if (!window.confirm('Approve this restaurant admin?')) return;
+    if (!window.confirm("Approve this restaurant admin?")) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:3003/api/auth/${id}`,
+        `${userUrl}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setRestaurantAdmins(prev =>
-        prev.map(admin => (admin._id === id ? { ...admin, isApproved: true } : admin))
+      setRestaurantAdmins((prev) =>
+        prev.map((admin) =>
+          admin._id === id ? { ...admin, isApproved: true } : admin
+        )
       );
     } catch {
-      alert('Failed to approve user');
+      alert("Failed to approve user");
     }
   };
 
   const filteredAdmins = restaurantAdmins
-    .filter(admin =>
-      admin.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      admin.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (admin) =>
+        admin.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        admin.email?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .filter(admin => {
-      if (approvalFilter === 'approved') return admin.isApproved;
-      if (approvalFilter === 'pending') return !admin.isApproved;
+    .filter((admin) => {
+      if (approvalFilter === "approved") return admin.isApproved;
+      if (approvalFilter === "pending") return !admin.isApproved;
       return true;
     });
 
@@ -89,21 +107,27 @@ const AdminRestaurant = () => {
 
           <div className="flex gap-3 items-center w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Search
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500 w-full"
               />
             </div>
 
             <div className="relative">
-              <Filter className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Filter
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <select
                 value={approvalFilter}
-                onChange={e => setApprovalFilter(e.target.value as any)}
+                onChange={(e) => setApprovalFilter(e.target.value as any)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="all">All</option>
@@ -134,12 +158,15 @@ const AdminRestaurant = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {filteredAdmins.map((admin, index) => (
-                  <tr key={admin._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <tr
+                    key={admin._id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     <td className="px-6 py-3">{index + 1}</td>
-                    <td className="px-6 py-3">{admin.name || '-'}</td>
-                    <td className="px-6 py-3">{admin.email || '-'}</td>
-                    <td className="px-6 py-3">{admin.phone || '-'}</td>
-                    <td className="px-6 py-3">{admin.address || '-'}</td>
+                    <td className="px-6 py-3">{admin.name || "-"}</td>
+                    <td className="px-6 py-3">{admin.email || "-"}</td>
+                    <td className="px-6 py-3">{admin.phone || "-"}</td>
+                    <td className="px-6 py-3">{admin.address || "-"}</td>
                     <td className="px-6 py-3">
                       {admin.isApproved ? (
                         <CheckCircle className="text-green-500" size={20} />

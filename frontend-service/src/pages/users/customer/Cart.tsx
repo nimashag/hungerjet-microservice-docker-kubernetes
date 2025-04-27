@@ -5,6 +5,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, MapPin, FileText, CreditCard } from 'lucide-react';
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 const Cart: React.FC = () => {
   const { cartItems, clearCart, updateItemQuantity, removeItem } = useCart();
   const [loading, setLoading] = useState(false);
@@ -63,7 +69,7 @@ const Cart: React.FC = () => {
       );
 
       const res = await axios.post(
-        'http://localhost:3002/api/orders',
+        `${orderUrl}/api/orders`,
         {
           restaurantId,
           items: cartItems,

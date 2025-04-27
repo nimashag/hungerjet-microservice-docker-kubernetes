@@ -12,6 +12,12 @@ type Restaurant = {
   available: boolean;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
@@ -23,9 +29,7 @@ const RestaurantList: React.FC = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3001/api/restaurants"
-        );
+        const response = await axios.get(`${restaurantUrl}/api/restaurants`);
         setRestaurants(response.data);
       } catch (error) {
         console.error("Error fetching restaurants:", error);
@@ -93,7 +97,7 @@ const RestaurantList: React.FC = () => {
                   className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                 >
                   <img
-                    src={`http://localhost:3001/uploads/${restaurant.image}`}
+                    src={`${restaurantUrl}/uploads/${restaurant.image}`}
                     alt={restaurant.name}
                     className="w-full h-48 object-cover"
                   />

@@ -1,17 +1,25 @@
-import { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
-import axios from 'axios';
+import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import gsap from "gsap";
+import axios from "axios";
+
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const LoginCustomer = () => {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: '' });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -19,18 +27,18 @@ const LoginCustomer = () => {
     let tempErrors: { email?: string; password?: string } = {};
 
     if (!form.email.trim()) {
-      tempErrors.email = 'Email is required';
+      tempErrors.email = "Email is required";
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = 'Invalid email address';
+      tempErrors.email = "Invalid email address";
       valid = false;
     }
 
     if (!form.password.trim()) {
-      tempErrors.password = 'Password is required';
+      tempErrors.password = "Password is required";
       valid = false;
     } else if (form.password.length < 6) {
-      tempErrors.password = 'Password must be at least 6 characters';
+      tempErrors.password = "Password must be at least 6 characters";
       valid = false;
     }
 
@@ -40,11 +48,11 @@ const LoginCustomer = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!validateForm()) return;
-  
+
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/login', form);
+      const res = await axios.post(`${userUrl}/api/auth/login`, form);
       console.log(`Login response: ${JSON.stringify(res)}`);
 
       const { token, user } = res.data;
@@ -57,7 +65,7 @@ const LoginCustomer = () => {
       }
     } catch (err: any) {
       const message =
-        err.response?.data?.message || 'Invalid credentials or server error';
+        err.response?.data?.message || "Invalid credentials or server error";
       alert(message);
     }
   };
@@ -66,15 +74,15 @@ const LoginCustomer = () => {
     gsap.to(liquidRef.current, {
       x: 0,
       duration: 0.5,
-      ease: 'power2.out',
+      ease: "power2.out",
     });
   };
 
   const handleMouseLeave = () => {
     gsap.to(liquidRef.current, {
-      x: '-100%',
+      x: "-100%",
       duration: 0.5,
-      ease: 'power2.inOut',
+      ease: "power2.inOut",
     });
   };
 
@@ -87,7 +95,8 @@ const LoginCustomer = () => {
             Welcome Back!
           </h2>
           <p className="text-gray-500 mb-6 text-center">
-            Simplify your workflow and boost your productivity with HungerJet. Get started for free.
+            Simplify your workflow and boost your productivity with HungerJet.
+            Get started for free.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -99,7 +108,7 @@ const LoginCustomer = () => {
                 value={form.email}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                  errors.email ? 'border-red-500' : 'focus:ring-green-500'
+                  errors.email ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
               {errors.email && (
@@ -115,7 +124,7 @@ const LoginCustomer = () => {
                 value={form.password}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                  errors.password ? 'border-red-500' : 'focus:ring-green-500'
+                  errors.password ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
               {errors.password && (
@@ -139,7 +148,7 @@ const LoginCustomer = () => {
                 <div
                   ref={liquidRef}
                   className="absolute top-0 left-0 h-full w-full bg-green-500 rounded-full z-10"
-                  style={{ transform: 'translateX(-100%)' }}
+                  style={{ transform: "translateX(-100%)" }}
                 />
               </button>
             </div>
@@ -165,7 +174,7 @@ const LoginCustomer = () => {
 
           <Link to="/register/customer">
             <p className="text-center text-sm mt-6">
-              Not a member?{' '}
+              Not a member?{" "}
               <span className="text-green-600 hover:underline cursor-pointer">
                 Register now
               </span>

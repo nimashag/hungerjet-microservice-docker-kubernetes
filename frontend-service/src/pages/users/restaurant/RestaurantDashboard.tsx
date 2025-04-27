@@ -7,7 +7,11 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
-const API_BASE = "http://localhost:3001";
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 interface Restaurant {
   _id: string;
@@ -41,7 +45,7 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/api/restaurants/my`, {
+        const res = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -94,7 +98,7 @@ export const AdminDashboard: React.FC = () => {
     if (form.image) formData.append("image", form.image);
 
     try {
-      const res = await axios.post(`${API_BASE}/api/restaurants`, formData, {
+      const res = await axios.post(`${restaurantUrl}/api/restaurants`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -151,7 +155,7 @@ export const AdminDashboard: React.FC = () => {
 
     try {
       const res = await axios.put(
-        `${API_BASE}/api/restaurants/${restaurant._id}`,
+        `${restaurantUrl}/api/restaurants/${restaurant._id}`,
         formData,
         {
           headers: {
@@ -182,7 +186,7 @@ export const AdminDashboard: React.FC = () => {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`${API_BASE}/api/restaurants/${restaurant._id}`, {
+        await axios.delete(`${restaurantUrl}/api/restaurants/${restaurant._id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -202,7 +206,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient from-gray-50 to-gray-200 p-4">
         <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6 md:p-10 space-y-6">
           <div className="flex items-center justify-between flex-wrap">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
               🍽️ Restaurant Details
             </h1>
             <div className="flex gap-4 mt-4 md:mt-0">
@@ -231,7 +235,7 @@ export const AdminDashboard: React.FC = () => {
                 </h2> */}
                 {restaurant.image && (
                   <img
-                    src={`http://localhost:3001/uploads/${restaurant.image}`}
+                    src={`${restaurantUrl}/uploads/${restaurant.image}`}
                     alt="restaurant"
                     className="rounded-2xl w-full max-w-full object-cover shadow-md"
                   />

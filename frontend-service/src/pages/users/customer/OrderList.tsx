@@ -26,6 +26,12 @@ interface Order {
   createdAt: string;
 }
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +48,7 @@ const OrderList: React.FC = () => {
           return;
         }
 
-        const res = await axios.get("http://localhost:3002/api/orders", {
+        const res = await axios.get(`${orderUrl}/api/orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

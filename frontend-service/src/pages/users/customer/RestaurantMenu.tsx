@@ -19,6 +19,13 @@ type Restaurant = {
   available: boolean;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
+
 const RestaurantMenu: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -35,7 +42,7 @@ const RestaurantMenu: React.FC = () => {
     const fetchRestaurant = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/restaurants/${restaurantId}`
+          `${restaurantUrl}/api/restaurants/${restaurantId}`
         );
         setRestaurant(response.data);
       } catch (error) {
@@ -46,7 +53,7 @@ const RestaurantMenu: React.FC = () => {
     const fetchMenuItems = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/restaurants/${restaurantId}/menu-items`
+          `${restaurantUrl}/api/restaurants/${restaurantId}/menu-items`
         );
         const items: MenuItem[] = response.data;
         setMenuItems(items);
@@ -175,7 +182,7 @@ const RestaurantMenu: React.FC = () => {
                       className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
                     >
                       <img
-                        src={`http://localhost:3001/uploads/${item.image}`}
+                        src={`${restaurantUrl}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-full h-52 object-cover rounded-t-2xl"
                       />

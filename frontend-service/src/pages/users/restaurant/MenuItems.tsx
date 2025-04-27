@@ -5,6 +5,7 @@ import { Pencil, Trash2, PlusCircle, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const MySwal = withReactContent(Swal);
 
@@ -24,12 +25,6 @@ interface Restaurant {
   image?: string;
   available: boolean;
 }
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const MenuItems = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);

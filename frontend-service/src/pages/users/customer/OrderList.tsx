@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../../components/Navbar"; // adjust path if needed
 import { useNavigate } from "react-router-dom";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 interface OrderItem {
   menuItemId: string;
@@ -25,12 +26,6 @@ interface Order {
   };
   createdAt: string;
 }
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const OrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);

@@ -2,16 +2,11 @@ import React from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../api";
 
 interface CheckoutFormProps {
   clientSecret: string;
 }
-
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
-const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
-const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
-const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
-const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
   const stripe = useStripe();

@@ -25,7 +25,11 @@ interface Order {
   items: OrderItem[];
 }
 
-const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000";
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RestaurantOrders = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -35,7 +39,7 @@ const RestaurantOrders = () => {
   const fetchRestaurant = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${apiBase}/api/restaurants/my`, {
+      const response = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRestaurant(response.data[0]);
@@ -48,7 +52,7 @@ const RestaurantOrders = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${apiBase}/api/orders/restaurant/${restaurantId}`
+        `${orderUrl}/api/orders/restaurant/${restaurantId}`
       );
       setOrders(response.data);
     } catch (error) {
@@ -83,7 +87,7 @@ const RestaurantOrders = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `${apiBase}/api/orders/${orderId}`,
+        `${orderUrl}/api/orders/${orderId}`,
         { status: newStatus },
         {
           headers: {

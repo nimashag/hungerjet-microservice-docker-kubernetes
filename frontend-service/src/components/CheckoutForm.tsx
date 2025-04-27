@@ -7,6 +7,12 @@ interface CheckoutFormProps {
   clientSecret: string;
 }
 
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -39,7 +45,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
         if (result.paymentIntent?.status === 'succeeded') {
           // Update the order status and payment status after successful payment
           await axios.patch(
-            `http://localhost:3002/api/orders/${orderId}/mark-paid`,
+            `${orderUrl}/api/orders/${orderId}/mark-paid`,
             {
               paymentMethod: "Stripe",
               transactionId: result.paymentIntent.id,

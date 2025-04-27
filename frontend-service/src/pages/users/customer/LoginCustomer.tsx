@@ -52,7 +52,7 @@ const LoginCustomer = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/login', form);
+      const res = await axios.post(`${userUrl}/api/auth/login`, form);
       console.log(`Login response: ${JSON.stringify(res)}`);
 
       const { token, user } = res.data;

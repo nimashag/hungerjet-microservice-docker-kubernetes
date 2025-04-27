@@ -42,7 +42,7 @@ const RestaurantMenu: React.FC = () => {
     const fetchRestaurant = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/restaurants/${restaurantId}`
+          `${restaurantUrl}/api/restaurants/${restaurantId}`
         );
         setRestaurant(response.data);
       } catch (error) {

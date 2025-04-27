@@ -5,9 +5,7 @@ import gsap from "gsap";
 
 const LoginRestaurant = () => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -45,17 +43,13 @@ const LoginRestaurant = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post(
-        "http://localhost:3003/api/auth/login",
-        form
-      );
-      console.log(`Login response: ${JSON.stringify(res)}`);
+      const res = await axios.post("http://localhost:3003/api/auth/login", form);
 
       const { token, user } = res.data;
 
       if (user.role === "restaurantAdmin") {
-        localStorage.setItem("token", token); // Save token to localStorage
-        localStorage.setItem("user", JSON.stringify(user)); // Save user info
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
         navigate("/restaurant-dash");
       } else {
         alert("Access denied: Not a restaurant admin");
@@ -82,14 +76,14 @@ const LoginRestaurant = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-blue-100 via-white to-purple-200 font-sans">
+      {/* Left Panel with Glassmorphism */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Restaurant Admin Login
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Access your dashboard to manage restaurant orders and menus.
           </p>
 
@@ -101,13 +95,11 @@ const LoginRestaurant = () => {
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.email ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
             <div>
@@ -117,20 +109,18 @@ const LoginRestaurant = () => {
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.password ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             <div className="text-right text-sm text-green-600 hover:underline cursor-pointer">
               Forgot Password?
             </div>
 
-            {/* GSAP Button */}
+            {/* GSAP Liquid Button */}
             <div className="relative w-full mt-2">
               <button
                 type="submit"
@@ -147,24 +137,6 @@ const LoginRestaurant = () => {
               </button>
             </div>
           </form>
-
-          <div className="flex items-center my-6">
-            <hr className="flex-grow border-t" />
-            <span className="mx-4 text-gray-400">or continue with</span>
-            <hr className="flex-grow border-t" />
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              G
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              T
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              f
-            </button>
-          </div>
 
           <Link to="/register/restaurant">
             <p className="text-center text-sm mt-6">

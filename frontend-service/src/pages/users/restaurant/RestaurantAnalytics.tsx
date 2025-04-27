@@ -111,6 +111,9 @@ const RestaurantAnalytics = () => {
   const pendingOrders = orders.filter(
     (order) => order.status === "Pending"
   ).length;
+  const WaitingForPickup = orders.filter(
+    (order) => order.status === "Waiting for Pickup"
+  ).length;
 
   // Calculate orders over time (monthly)
   const ordersByMonth = orders.reduce((acc: Record<string, number>, order) => {
@@ -164,7 +167,8 @@ const RestaurantAnalytics = () => {
         ) : (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
               {/* Total Menu Items */}
               <div className="p-6 bg-white shadow rounded-xl flex flex-col items-center text-center">
                 <div className="bg-blue-100 text-blue-600 rounded-full p-3 mb-4">
@@ -206,6 +210,17 @@ const RestaurantAnalytics = () => {
                 <p className="text-sm text-gray-500">Pending Orders</p>
                 <h3 className="text-2xl font-bold text-yellow-500">
                   {pendingOrders}
+                </h3>
+              </div>
+
+              {/* Waiting for Pickup */}
+              <div className="p-6 bg-white shadow rounded-xl flex flex-col items-center text-center">
+                <div className="bg-yellow-100 text-yellow-500 rounded-full p-3 mb-4">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <p className="text-sm text-gray-500">Waiting for Pickup</p>
+                <h3 className="text-2xl font-bold text-yellow-500">
+                  {WaitingForPickup}
                 </h3>
               </div>
             </div>

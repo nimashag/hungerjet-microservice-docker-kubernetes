@@ -2,7 +2,11 @@ import { useState, useRef } from "react";
 import axios from "axios";
 import gsap from "gsap";
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RegisterCustomer = () => {
   const [form, setForm] = useState({
@@ -62,7 +66,7 @@ const RegisterCustomer = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post(`${apiBase}/api/auth/register`, {
+      const res = await axios.post(`${userUrl}/api/auth/register`, {
         ...form,
         role: "customer",
       });

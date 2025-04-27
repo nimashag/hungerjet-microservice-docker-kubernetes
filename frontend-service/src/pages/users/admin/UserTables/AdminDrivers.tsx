@@ -13,7 +13,11 @@ type Driver = {
   role?: string;
 };
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const AdminDrivers = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -27,7 +31,7 @@ const AdminDrivers = () => {
   const fetchDrivers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`${apiBase}/api/auth/all`, {
+      const res = await axios.get(`${userUrl}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const onlyDrivers = res.data.filter(
@@ -49,7 +53,7 @@ const AdminDrivers = () => {
       return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${apiBase}/api/auth/${id}`, {
+      await axios.delete(`${userUrl}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDrivers((prev) => prev.filter((d) => d._id !== id));
@@ -63,7 +67,7 @@ const AdminDrivers = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `${apiBase}/api/auth/${id}`,
+        `${userUrl}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );

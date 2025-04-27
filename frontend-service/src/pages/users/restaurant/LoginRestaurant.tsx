@@ -3,7 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 
 const LoginRestaurant = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -48,7 +53,7 @@ const LoginRestaurant = () => {
 
     try {
       const res = await axios.post(
-        `${apiBase}/api/auth/login`,
+        `${userUrl}/api/auth/login`,
         form
       );
       console.log(`Login response: ${JSON.stringify(res)}`);

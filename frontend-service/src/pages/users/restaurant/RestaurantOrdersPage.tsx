@@ -25,7 +25,7 @@ interface Order {
   items: OrderItem[];
 }
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000";
 
 const RestaurantOrders = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -35,12 +35,9 @@ const RestaurantOrders = () => {
   const fetchRestaurant = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${apiBase}/api/restaurants/my`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${apiBase}/api/restaurants/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setRestaurant(response.data[0]);
     } catch (error) {
       console.error("Error fetching restaurant:", error);

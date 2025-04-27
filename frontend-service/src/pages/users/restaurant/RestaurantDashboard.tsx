@@ -7,7 +7,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000";
 
 interface Restaurant {
   _id: string;

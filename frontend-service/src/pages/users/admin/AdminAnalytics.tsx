@@ -32,7 +32,12 @@ type User = {
   createdAt: string;
 };
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 
 const AdminAnalytics = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -42,7 +47,7 @@ const AdminAnalytics = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`${apiBase}/api/auth/all`, {
+        const res = await axios.get(`${userUrl}/api/auth/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const onlyUsers = res.data.filter((user: User) =>

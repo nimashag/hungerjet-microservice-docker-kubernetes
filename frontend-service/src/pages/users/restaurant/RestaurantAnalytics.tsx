@@ -41,7 +41,11 @@ type Order = {
   createdAt: string;
 };
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const RestaurantAnalytics = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -59,18 +63,15 @@ const RestaurantAnalytics = () => {
         }
 
         // Fetch restaurant by user ID
-        const restaurantRes = await axios.get(
-          `${apiBase}/api/restaurants/my`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const restaurantRes = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const restaurantData: Restaurant = restaurantRes.data[0];
         setRestaurant(restaurantData);
 
         // Fetch menu items by user ID
         const menuItemsRes = await axios.get(
-          `${apiBase}/api/restaurants/my/menu-items`,
+          `${restaurantUrl}/api/restaurants/my/menu-items`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -80,7 +81,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch orders by restaurant ID
         const ordersRes = await axios.get(
-          `${apiBase}/api/orders/restaurant/${restaurantData._id}`,
+          `${orderUrl}/api/orders/restaurant/${restaurantData._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

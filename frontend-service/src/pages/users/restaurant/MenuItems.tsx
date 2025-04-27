@@ -25,7 +25,11 @@ interface Restaurant {
   available: boolean;
 }
 
-const apiBase = import.meta.env.VITE_API_BASE;
+const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
+const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
+const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
+const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
+const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
 
 const MenuItems = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -54,12 +58,9 @@ const MenuItems = () => {
   const fetchRestaurant = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${apiBase}/api/restaurants/my`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setRestaurant(response.data[0]);
     } catch (error) {
       console.error("Error fetching restaurant:", error);
@@ -70,7 +71,7 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${apiBase}/api/restaurants/my/menu-items`,
+        `${restaurantUrl}/api/restaurants/my/menu-items`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -156,7 +157,7 @@ const MenuItems = () => {
 
     try {
       const res = await axios.post(
-        `${apiBase}/api/restaurants/${restaurant._id}/menu-items`,
+        `${restaurantUrl}/api/restaurants/${restaurant._id}/menu-items`,
         formData,
         {
           headers: {
@@ -190,12 +191,9 @@ const MenuItems = () => {
     if (confirm.isConfirmed) {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(
-          `${apiBase}/api/restaurants/my/menu-items/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await axios.delete(`${restaurantUrl}/api/restaurants/my/menu-items/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setMenuItems(menuItems.filter((item) => item._id !== id));
         Swal.fire("Deleted!", "Menu item has been deleted.", "success");
       } catch (err) {
@@ -254,7 +252,7 @@ const MenuItems = () => {
 
     try {
       await axios.put(
-        `${apiBase}/api/restaurants/my/menu-items/${editingItem._id}`,
+        `${restaurantUrl}/api/restaurants/my/menu-items/${editingItem._id}`,
         formData,
         {
           headers: {
@@ -363,7 +361,7 @@ const MenuItems = () => {
                   <td className="px-4 py-3">
                     {item.image ? (
                       <img
-                        src={`${apiBase}/uploads/${item.image}`}
+                        src={`${restaurantUrl}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />

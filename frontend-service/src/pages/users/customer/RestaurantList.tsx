@@ -124,6 +124,9 @@ const RestaurantList: React.FC = () => {
                     <div className="flex justify-end pt-1">
                       <a
                         href={`/restaurants/${restaurant._id}`}
+                        onClick={() => {
+                          localStorage.setItem('selectedRestaurantId', restaurant._id);
+                        }}
                         className="text-sm font-medium text-amber-900 hover:text-amber-700 transition-colors duration-200"
                       >
                         View Menu →

@@ -108,7 +108,7 @@ const Navbar: React.FC = () => {
                   <Link to="/profile" className="hover:text-[#FF5722]">
                     My Profile
                   </Link>
-                  <Link to="/order/pendingOrder" className="hover:text-[#FF5722]">
+                  <Link to="/my-orders" className="hover:text-[#FF5722]">
                     My Orders
                   </Link>
                   <p className="cursor-pointer hover:text-[#FF5722]" onClick={logout}>

@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { FaShoppingCart } from "react-icons/fa";
+import { useCart } from "../../../contexts/CartContext";
 
 type MenuItem = {
   _id: string;
@@ -14,11 +15,16 @@ type MenuItem = {
   image: string;
 };
 
+type Restaurant = {
+  available: boolean;
+};
+
 const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:31000"
 const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:31000";
 const restaurantUrl = import.meta.env.VITE_RESTAURANT_URL || "http://localhost:31000";
 const orderUrl = import.meta.env.VITE_ORDER_URL || "http://localhost:31000";
 const deliveryUrl = import.meta.env.VITE_USER_URL|| " http://localhost:31000";
+
 
 const RestaurantMenu: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
@@ -28,8 +34,22 @@ const RestaurantMenu: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const token = localStorage.getItem("token");
+  const { addToCart } = useCart();
 
   useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/restaurants/${restaurantId}`
+        );
+        setRestaurant(response.data);
+      } catch (error) {
+        console.error("Error fetching restaurant data:", error);
+      }
+    };
+
     const fetchMenuItems = async () => {
       try {
         const response = await axios.get(
@@ -50,7 +70,10 @@ const RestaurantMenu: React.FC = () => {
       }
     };
 
-    if (restaurantId) fetchMenuItems();
+    if (restaurantId){
+      fetchRestaurant();  // Fetch restaurant availability
+      fetchMenuItems();   // Fetch menu items
+    }
   }, [restaurantId]);
 
   useEffect(() => {
@@ -86,6 +109,16 @@ const RestaurantMenu: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
+    const cartItem = {
+      menuItemId: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+    };
+  
+    addToCart(cartItem);
+  
+    console.log("Added to cart:", cartItem); // 👈 Logs the cart item details
     alert(`🛒 ${item.name} added to cart!`);
   };
 
@@ -176,7 +209,8 @@ const RestaurantMenu: React.FC = () => {
                         <div className="pt-3 flex justify-end">
                           <button
                             onClick={() => handleAddToCart(item)}
-                            className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400"
+                            disabled={restaurant?.available === false} 
+                            className={`relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 ${restaurant?.available === false ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             <span className="relative px-6 py-1 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent flex items-center gap-2">
                               <FaShoppingCart /> Add to Cart

@@ -7,6 +7,8 @@ import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
 
 import Orders from './pages/Orders';
 
+import PaymentPage from './pages/PaymentPage';
+
 import LoginCustomer from './pages/users/customer/LoginCustomer';
 import LoginAdmin from './pages/users/admin/LoginAdmin';
 import LoginDelivery from './pages/users/delivery/LoginDelivery';
@@ -16,9 +18,13 @@ import RegisterCustomer from './pages/users/customer/RegisterCustomer';
 import Home from './pages/users/customer/CustomerHome';
 import RestaurantList from './pages/users/customer/RestaurantList';
 import RestaurantMenu from './pages/users/customer/RestaurantMenu';
+import OrderList from './pages/users/customer/OrderList';
+import Cart from './pages/users/customer/Cart';
+import Order from './pages/users/customer/Order';
 
 import RegisterDelivery from './pages/users/delivery/RegisterDelivery';
 import RegisterRestaurant from './pages/users/restaurant/RegisterRestaurant';
+
 import AdminDashboard from './pages/users/admin/AdminDashboard';
 import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
 import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
@@ -56,9 +62,13 @@ function App() {
                 <Route path="/register/restaurant" element={<RegisterRestaurant />} />
 
                 {/* Customer Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/order/:orderId" element={<Order />}/>
+                <Route path="/my-orders" element={<OrderList />}/>
                 <Route path="/customer-home" element={<Home />} />
                 <Route path="/restaurants" element={<RestaurantList />} />
                 <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
+                <Route path="/cart" element={<Cart />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -66,6 +76,8 @@ function App() {
                 <Route path='/admin/restaurants' element={<AdminRestaurant />} />
                 <Route path='/admin/drivers' element={<AdminDrivers />} />
                 <Route path='/admin/analytics' element={<AdminAnalytics />} />
+
+                <Route path="/payment" element={<PaymentPage />} />
 
             </Routes>
         </BrowserRouter>

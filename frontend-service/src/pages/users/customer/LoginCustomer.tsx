@@ -52,9 +52,17 @@ const LoginCustomer = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post(`${userUrl}/api/auth/login`, form);
+      const res = await axios.post('http://localhost:3003/api/auth/login', form);
+      console.log(`Login response: ${JSON.stringify(res)}`);
 
-      navigate("/customer-home");
+      const { token, user } = res.data;
+
+      if (user.role === "customer") {
+        localStorage.setItem("token", token); // Save token to localStorage
+      navigate('/customer-home');
+      } else {
+        alert("Access denied: Not a restaurant admin");
+      }
     } catch (err: any) {
       const message =
         err.response?.data?.message || "Invalid credentials or server error";

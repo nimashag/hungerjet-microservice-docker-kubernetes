@@ -15,6 +15,8 @@ type Customer = {
   role?: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ const AdminCustomers = () => {
   const fetchCustomers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:31000/api/auth/all", {
+      const res = await axios.get(`${apiBase}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const onlyCustomers = res.data.filter(
@@ -47,7 +49,7 @@ const AdminCustomers = () => {
       return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:31000/api/auth/${id}`, {
+      await axios.delete(`${apiBase}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCustomers((prev) => prev.filter((c) => c._id !== id));
@@ -61,7 +63,7 @@ const AdminCustomers = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:31000/api/auth/${id}`,
+        `${apiBase}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );

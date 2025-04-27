@@ -12,6 +12,8 @@ type Restaurant = {
   available: boolean;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
@@ -24,7 +26,7 @@ const RestaurantList: React.FC = () => {
     const fetchRestaurants = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:31000/api/restaurants"
+          `${apiBase}/api/restaurants`
         );
         setRestaurants(response.data);
       } catch (error) {
@@ -93,7 +95,7 @@ const RestaurantList: React.FC = () => {
                   className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                 >
                   <img
-                    src={`http://localhost:31000/uploads/${restaurant.image}`}
+                    src={`${apiBase}/uploads/${restaurant.image}`}
                     alt={restaurant.name}
                     className="w-full h-48 object-cover"
                   />

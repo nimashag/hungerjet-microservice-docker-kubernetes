@@ -13,6 +13,8 @@ type Driver = {
   role?: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const AdminDrivers = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ const AdminDrivers = () => {
   const fetchDrivers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:31000/api/auth/all", {
+      const res = await axios.get(`${apiBase}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const onlyDrivers = res.data.filter(
@@ -47,7 +49,7 @@ const AdminDrivers = () => {
       return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:31000/api/auth/${id}`, {
+      await axios.delete(`${apiBase}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDrivers((prev) => prev.filter((d) => d._id !== id));
@@ -61,7 +63,7 @@ const AdminDrivers = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:31000/api/auth/${id}`,
+        `${apiBase}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -13,6 +13,8 @@ type RestaurantAdmin = {
   role?: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const AdminRestaurant = () => {
   const [restaurantAdmins, setRestaurantAdmins] = useState<RestaurantAdmin[]>(
     []
@@ -27,7 +29,7 @@ const AdminRestaurant = () => {
   const fetchRestaurantAdmins = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:31000/api/auth/all", {
+      const res = await axios.get(`${apiBase}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const filtered = res.data.filter(
@@ -49,7 +51,7 @@ const AdminRestaurant = () => {
       return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:31000/api/auth/${id}`, {
+      await axios.delete(`${apiBase}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRestaurantAdmins((prev) => prev.filter((admin) => admin._id !== id));
@@ -63,7 +65,7 @@ const AdminRestaurant = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:31000/api/auth/${id}`,
+        `${apiBase}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );

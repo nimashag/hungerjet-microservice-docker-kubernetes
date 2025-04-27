@@ -32,6 +32,8 @@ type User = {
   createdAt: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const AdminAnalytics = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const AdminAnalytics = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:31000/api/auth/all", {
+        const res = await axios.get(`${apiBase}/api/auth/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const onlyUsers = res.data.filter((user: User) =>

@@ -25,6 +25,8 @@ interface Order {
   items: OrderItem[];
 }
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const RestaurantOrders = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -34,7 +36,7 @@ const RestaurantOrders = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:31000/api/restaurants/my",
+        `${apiBase}/api/restaurants/my`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -49,7 +51,7 @@ const RestaurantOrders = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:31000/api/orders/restaurant/${restaurantId}`
+        `${apiBase}/api/orders/restaurant/${restaurantId}`
       );
       setOrders(response.data);
     } catch (error) {
@@ -84,7 +86,7 @@ const RestaurantOrders = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:31000/api/orders/${orderId}`,
+        `${apiBase}/api/orders/${orderId}`,
         { status: newStatus },
         {
           headers: {

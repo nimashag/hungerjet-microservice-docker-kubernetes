@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const RegisterRestaurant = () => {
   const [form, setForm] = useState({
     name: "",
@@ -53,7 +55,7 @@ const RegisterRestaurant = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post("http://localhost:31000/api/auth/register", {
+      const res = await axios.post(`${apiBase}/api/auth/register`, {
         ...form,
         role: "restaurantAdmin",
       });

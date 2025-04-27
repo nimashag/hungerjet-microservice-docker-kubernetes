@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import axios from "axios";
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const LoginCustomer = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
@@ -47,7 +49,7 @@ const LoginCustomer = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:31000/api/auth/login",
+        `${apiBase}/api/auth/login`,
         form
       );
 

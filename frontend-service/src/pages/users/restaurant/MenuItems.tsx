@@ -25,6 +25,8 @@ interface Restaurant {
   available: boolean;
 }
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const MenuItems = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -53,7 +55,7 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:31000/api/restaurants/my",
+        `${apiBase}/api/restaurants/my`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -68,7 +70,7 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:31000/api/restaurants/my/menu-items",
+        `${apiBase}/api/restaurants/my/menu-items`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +156,7 @@ const MenuItems = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:31000/api/restaurants/${restaurant._id}/menu-items`,
+        `${apiBase}/api/restaurants/${restaurant._id}/menu-items`,
         formData,
         {
           headers: {
@@ -189,7 +191,7 @@ const MenuItems = () => {
       try {
         const token = localStorage.getItem("token");
         await axios.delete(
-          `http://localhost:31000/api/restaurants/my/menu-items/${id}`,
+          `${apiBase}/api/restaurants/my/menu-items/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -252,7 +254,7 @@ const MenuItems = () => {
 
     try {
       await axios.put(
-        `http://localhost:31000/api/restaurants/my/menu-items/${editingItem._id}`,
+        `${apiBase}/api/restaurants/my/menu-items/${editingItem._id}`,
         formData,
         {
           headers: {
@@ -361,7 +363,7 @@ const MenuItems = () => {
                   <td className="px-4 py-3">
                     {item.image ? (
                       <img
-                        src={`http://localhost:31000/uploads/${item.image}`}
+                        src={`${apiBase}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />

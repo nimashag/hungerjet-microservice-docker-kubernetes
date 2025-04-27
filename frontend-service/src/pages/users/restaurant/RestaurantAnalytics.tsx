@@ -41,6 +41,8 @@ type Order = {
   createdAt: string;
 };
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const RestaurantAnalytics = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -58,7 +60,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch restaurant by user ID
         const restaurantRes = await axios.get(
-          "http://localhost:31000/api/restaurants/my",
+          `${apiBase}/api/restaurants/my`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -68,7 +70,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch menu items by user ID
         const menuItemsRes = await axios.get(
-          "http://localhost:31000/api/restaurants/my/menu-items",
+          `${apiBase}/api/restaurants/my/menu-items`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -78,7 +80,7 @@ const RestaurantAnalytics = () => {
 
         // Fetch orders by restaurant ID
         const ordersRes = await axios.get(
-          `http://localhost:31000/api/orders/restaurant/${restaurantData._id}`,
+          `${apiBase}/api/orders/restaurant/${restaurantData._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

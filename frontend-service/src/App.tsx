@@ -7,6 +7,8 @@ import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
 
 import Orders from './pages/Orders';
 
+import PaymentPage from './pages/PaymentPage';
+
 import LoginCustomer from './pages/users/customer/LoginCustomer';
 import LoginAdmin from './pages/users/admin/LoginAdmin';
 import LoginDelivery from './pages/users/delivery/LoginDelivery';
@@ -74,6 +76,8 @@ function App() {
                 <Route path='/admin/restaurants' element={<AdminRestaurant />} />
                 <Route path='/admin/drivers' element={<AdminDrivers />} />
                 <Route path='/admin/analytics' element={<AdminAnalytics />} />
+
+                <Route path="/payment" element={<PaymentPage />} />
 
             </Routes>
         </BrowserRouter>

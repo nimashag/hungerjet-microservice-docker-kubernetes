@@ -25,14 +25,6 @@ export const deleteOrder = async (id: string) => {
 
 export const getOrdersByUserId = (userId: string) => Order.find({ userId });
 
-export const updateOrderStatus = async (id: string, status: string) => {
-  return await Order.findByIdAndUpdate(
-    id, 
-    { status }, 
-    { new: true }
-  );
-};
-
 export const processOrderPayment = async (id: string, paymentDetails: any) => {
   // In a real implementation, you would integrate with payment gateway here
   // This is a simplified version
@@ -56,6 +48,14 @@ export const processOrderPayment = async (id: string, paymentDetails: any) => {
       // You might store transaction ID or other payment reference here
       paymentReference: paymentDetails.transactionId
     },
+    { new: true }
+  );
+};
+
+export const updateOrderStatus = async (id: string, status: string) => {
+  return await Order.findByIdAndUpdate(
+    id, 
+    { status }, 
     { new: true }
   );
 };

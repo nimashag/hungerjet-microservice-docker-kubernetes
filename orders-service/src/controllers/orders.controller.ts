@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as OrdersService from "../services/orders.service";
 import { AuthenticatedRequest } from "../middlewares/auth";
 import { fetchMenuItems, fetchRestaurant } from "../api/restaurant.api";
+import stripe from '../utils/stripe';
 
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -191,6 +192,112 @@ export const getCurrentUserOrders = async (req: AuthenticatedRequest, res: Respo
   }
 };
 
+export const createPaymentIntent = async (req: Request, res: Response) => {
+  try {
+    const { totalAmount } = req.body;
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.status(400).json({ message: "Total amount must be greater than 0." });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalAmount * 100), // 💳 Stripe accepts amounts in cents
+      currency: 'usd', // or your preferred currency
+      payment_method_types: ['card'],
+    });
+
+    console.log("✅ Created Payment Intent:", paymentIntent.id);
+
+    res.json({ 
+      clientSecret: paymentIntent.client_secret 
+    });
+  } catch (error) {
+    console.error("Error creating Payment Intent:", error);
+    res.status(500).json({ message: "Something went wrong while creating payment intent" });
+  }
+};
+
+export const stripeWebhook = async (req: Request, res: Response) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET as string; // <-- we'll get it soon
+  
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig as string, endpointSecret);
+  } catch (err: any) {
+    console.error(`⚠️  Webhook signature verification failed:`, err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle event types
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object as any;
+    const orderId = paymentIntent.metadata.orderId; // Assuming you store the orderId in metadata
+    await OrdersService.processOrderPayment(orderId, {
+      method: 'Stripe',
+      transactionId: paymentIntent.id,
+    });
+    
+    console.log('✅ PaymentIntent was successful:', paymentIntent.id);
+
+    // Find the order associated with paymentIntentId and mark it as Paid
+    // Example if you store paymentIntentId in your Order Model
+    // Or match by totalAmount and status
+  } else {
+    console.warn(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({ received: true });
+};
+
+export const markOrderPaid = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { paymentMethod, transactionId } = req.body;
+
+    // Call the service to update the order's payment status and status
+    const updatedOrder = await OrdersService.processOrderPayment(id, {
+      method: paymentMethod,
+      transactionId: transactionId,
+    });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    console.error("Error processing payment:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const markOrderAsPaid = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { paymentMethod, transactionId } = req.body;
+
+    if (!paymentMethod || !transactionId) {
+      return res.status(400).json({ message: "Payment method and transaction ID are required" });
+    }
+
+    const updatedOrder = await OrdersService.processOrderPayment(id, {
+      transactionId,
+      method: paymentMethod || 'Stripe'
+    });
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(updatedOrder);
+  } catch (err) {
+    console.error("Error marking order as paid:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
@@ -227,46 +334,5 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
   } catch (err) {
     console.error("Error updating order status:", err);
     res.status(500).json({ message: "Something went wrong" });
-  }
-};
-
-export const processPayment = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-    
-    const orderId = req.params.id;
-    const paymentDetails = req.body;
-    
-    console.log(`▶️ Processing payment for order ${orderId}`);
-    
-    // Validate the order belongs to the current user
-    const order = await OrdersService.getOrderById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    
-    if (order.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized to process payment for this order" });
-    }
-    
-    // In a real implementation, you would integrate with a payment gateway here
-    // For now, we'll simulate a successful payment
-    const updatedOrder = await OrdersService.processOrderPayment(orderId, paymentDetails);
-
-    if (!updatedOrder) {
-      return res.status(500).json({ message: "Failed to update order after payment" });
-    }
-    
-    console.log(`✅ Payment processed for order: ${updatedOrder._id}`);
-    res.json(updatedOrder);
-  } catch (err) {
-    console.error("Error processing payment:", err);
-    
-    // Provide more specific error messages for payment failures
-    if (err instanceof Error) {
-      return res.status(400).json({ message: err.message });
-    }
-    
-    res.status(500).json({ message: "Something went wrong processing payment" });
   }
 };

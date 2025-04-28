@@ -60,7 +60,7 @@ const RegisterRestaurant = () => {
       });
 
       alert(res.data.message || "Registered successfully!");
-      navigate("/restaurant-dash");
+      navigate("/restaurant/create");
     } catch (err: any) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -83,23 +83,14 @@ const RegisterRestaurant = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel - Image */}
-      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
-        <img
-          src="https://i.pinimg.com/736x/e8/9a/48/e89a4814d5742f04c1788aa2188dd7d3.jpg"
-          alt="Restaurant Owner Register"
-          className="rounded-2xl w-full h-full object-cover shadow-md"
-        />
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-blue-100 via-white to-purple-200 font-sans">
+      {/* Left Panel with Glassmorphism */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Register Your Restaurant
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Join HungerJet and start managing your restaurant orders and menus.
           </p>
 
@@ -118,7 +109,7 @@ const RegisterRestaurant = () => {
                   placeholder={field.placeholder}
                   value={form[field.name as keyof typeof form]}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                     errors[field.name]
                       ? "border-red-500"
                       : "focus:ring-green-500"
@@ -160,6 +151,15 @@ const RegisterRestaurant = () => {
             </a>
           </p>
         </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
+        <img
+          src="https://i.pinimg.com/736x/e8/9a/48/e89a4814d5742f04c1788aa2188dd7d3.jpg"
+          alt="Restaurant Owner Register"
+          className="rounded-2xl w-full h-full object-cover shadow-md"
+        />
       </div>
     </div>
   );

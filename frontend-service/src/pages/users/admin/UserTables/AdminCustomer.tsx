@@ -4,7 +4,19 @@ import AdminLayout from "../AdminLayout";
 import { CheckCircle, Trash2, Search, Filter, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../../api";
+import { userUrl } from "../../../../api";
+
+// Import your logo (example path - you can adjust it)
+import logo from "../../../../assets/Logo.png";
+
+// Extend jsPDF
+declare module "jspdf" {
+  interface jsPDF {
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
 
 type Customer = {
   _id: string;
@@ -21,9 +33,7 @@ const AdminCustomers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [approvalFilter, setApprovalFilter] = useState<
-    "all" | "approved" | "pending"
-  >("all");
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "approved" | "pending">("all");
 
   const fetchCustomers = async () => {
     try {
@@ -43,9 +53,12 @@ const AdminCustomers = () => {
     }
   };
 
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this customer?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this customer?")) return;
     try {
       const token = localStorage.getItem("token");
       await axios.delete(`${userUrl}/api/auth/${id}`, {
@@ -86,18 +99,29 @@ const AdminCustomers = () => {
       return true;
     });
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
   const generatePDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("HungerJet Customer Report", 14, 20);
-    doc.setFontSize(12);
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    const reportId = `CUS-${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}${now.getHours()}${now.getMinutes()}`;
 
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Add logo
+    doc.addImage(logo, "PNG", 14, 10, 30, 30);
+
+    // Title and Report ID
+    doc.setFontSize(18);
+    doc.text("HungerJet Customer Report", pageWidth / 2, 20, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Generated On: ${formattedDate} at ${formattedTime}`, 14, 45);
+    doc.text(`Report ID: ${reportId}`, 14, 51);
+
+    // Table
     autoTable(doc, {
-      startY: 30,
+      startY: 60,
       head: [["No", "Name", "Email", "Phone", "Address", "Approved"]],
       body: filteredCustomers.map((c, i) => [
         i + 1,
@@ -111,10 +135,11 @@ const AdminCustomers = () => {
 
     // Footer
     const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
     doc.text("Admin: John Doe", 14, pageHeight - 20);
-    doc.text("Signature: ___________________", 140, pageHeight - 20);
+    doc.text("Signature: ___________________", pageWidth - 80, pageHeight - 20);
 
-    doc.save("hungerjet_customer_report.pdf");
+    doc.save(`Customer_Report_${now.toISOString().slice(0, 10)}.pdf`);
   };
 
   return (
@@ -125,10 +150,7 @@ const AdminCustomers = () => {
 
           <div className="flex gap-3 items-center w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <Search
-                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
-                size={18}
-              />
+              <Search className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
               <input
                 type="text"
                 placeholder="Search"
@@ -139,10 +161,7 @@ const AdminCustomers = () => {
             </div>
 
             <div className="relative">
-              <Filter
-                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
-                size={18}
-              />
+              <Filter className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
               <select
                 value={approvalFilter}
                 onChange={(e) => setApprovalFilter(e.target.value as any)}
@@ -184,10 +203,7 @@ const AdminCustomers = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {filteredCustomers.map((customer, index) => (
-                  <tr
-                    key={customer._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                  <tr key={customer._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-3">{index + 1}</td>
                     <td className="px-6 py-3">{customer.name || "-"}</td>
                     <td className="px-6 py-3">{customer.email || "-"}</td>

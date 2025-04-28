@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../AdminLayout";
-import { CheckCircle, Trash2, Search, Filter } from "lucide-react";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../../api";
+import { CheckCircle, Trash2, Search, Filter, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { userUrl } from "../../../../api";
+
+// Import your logo (adjust path as needed)
+import logo from "../../../../assets/Logo.png";
+
+// Extend jsPDF
+declare module "jspdf" {
+  interface jsPDF {
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
 
 type Driver = {
   _id: string;
@@ -19,9 +33,7 @@ const AdminDrivers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [approvalFilter, setApprovalFilter] = useState<
-    "all" | "approved" | "pending"
-  >("all");
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "approved" | "pending">("all");
 
   const fetchDrivers = async () => {
     try {
@@ -41,11 +53,12 @@ const AdminDrivers = () => {
     }
   };
 
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
   const handleDelete = async (id: string) => {
-    if (
-      !window.confirm("Are you sure you want to delete this delivery driver?")
-    )
-      return;
+    if (!window.confirm("Are you sure you want to delete this delivery driver?")) return;
     try {
       const token = localStorage.getItem("token");
       await axios.delete(`${userUrl}/api/auth/${id}`, {
@@ -86,9 +99,48 @@ const AdminDrivers = () => {
       return true;
     });
 
-  useEffect(() => {
-    fetchDrivers();
-  }, []);
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    const reportId = `DR-${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}${now.getHours()}${now.getMinutes()}`;
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Add Logo
+    doc.addImage(logo, "PNG", 14, 10, 30, 30);
+
+    // Title and Meta
+    doc.setFontSize(18);
+    doc.text("HungerJet Drivers Report", pageWidth / 2, 20, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Generated On: ${formattedDate} at ${formattedTime}`, 14, 45);
+    doc.text(`Report ID: ${reportId}`, 14, 51);
+
+    // Table
+    autoTable(doc, {
+      startY: 60,
+      head: [["No", "Name", "Email", "Phone", "Address", "Approved"]],
+      body: filteredDrivers.map((d, i) => [
+        i + 1,
+        d.name || "-",
+        d.email || "-",
+        d.phone || "-",
+        d.address || "-",
+        d.isApproved ? "Yes" : "No",
+      ]),
+    });
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
+    doc.text("Admin: John Doe", 14, pageHeight - 20);
+    doc.text("Signature: ___________________", pageWidth - 80, pageHeight - 20);
+
+    doc.save(`Drivers_Report_${now.toISOString().slice(0, 10)}.pdf`);
+  };
 
   return (
     <AdminLayout>
@@ -126,6 +178,14 @@ const AdminDrivers = () => {
                 <option value="pending">Pending</option>
               </select>
             </div>
+
+            <button
+              onClick={generatePDF}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+            >
+              <Download size={16} />
+              Download Report
+            </button>
           </div>
         </div>
 
@@ -149,10 +209,7 @@ const AdminDrivers = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {filteredDrivers.map((driver, index) => (
-                  <tr
-                    key={driver._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                  <tr key={driver._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-3">{index + 1}</td>
                     <td className="px-6 py-3">{driver.name || "-"}</td>
                     <td className="px-6 py-3">{driver.email || "-"}</td>

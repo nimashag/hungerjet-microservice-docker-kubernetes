@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AdminLayout from "./RestaurantAdminLayout";
 import { LuTrash2, LuPencil } from "react-icons/lu";
-import { Utensils, ClipboardList, CheckCircle, Clock } from "lucide-react";
+import { Utensils, ClipboardList, CheckCircle, Clock, Package } from "lucide-react";
 import Swal from "sweetalert2";
 import { restaurantUrl, orderUrl } from "../../../api";
 
@@ -24,10 +24,17 @@ interface MenuItem {
   ordersCount?: number;
 }
 
+interface OrderItem {
+  menuItemId: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
 interface Order {
   _id: string;
   status: "Confirmed" | "Pending" | "Waiting for Pickup" | string;
-  menuItemId: string;
+  items: OrderItem[];
 }
 
 const AdminDashboard: React.FC = () => {
@@ -95,10 +102,17 @@ const AdminDashboard: React.FC = () => {
   const waitingForPickup = orders.filter((order) => order.status === "Waiting for Pickup").length;
 
   const menuItemOrdersCount = menuItems.map((item) => {
-    const count = orders.filter((order) => order.menuItemId === item._id).length;
+    let count = 0;
+    orders.forEach((order) => {
+      order.items.forEach((orderItem) => {
+        if (orderItem.menuItemId === item._id) {
+          count += orderItem.quantity; // important: add quantity
+        }
+      });
+    });
     return { ...item, ordersCount: count };
   });
-
+  
   const topOrderedItems = [...menuItemOrdersCount]
     .sort((a, b) => (b.ordersCount || 0) - (a.ordersCount || 0))
     .slice(0, 5);
@@ -146,7 +160,7 @@ const AdminDashboard: React.FC = () => {
             label: "Pending Orders",
             value: pendingOrders
           }, {
-            icon: <Clock className="text-orange-500" />,
+            icon: <Package className="text-orange-500" />,
             label: "Waiting for Pickup",
             value: waitingForPickup
           }].map((item, idx) => (

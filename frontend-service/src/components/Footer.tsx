@@ -1,5 +1,5 @@
 import React from 'react';
-import logoicon from '../assets/logo.png'; // Change to your real logo path
+import logoicon from '../assets/Logo.png'; 
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer: React.FC = () => {

@@ -1,53 +1,56 @@
 import React from 'react';
+import logoicon from '../assets/logo.png'; // Change to your real logo path
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-white border-t mt-16 text-[#4E342E]">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-sm">
+    <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] mt-12 border-t">
+      <div className="flex flex-col sm:grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 text-sm px-6">
         
-        {/* About Section */}
+        {/* Logo and About Section */}
         <div>
-          <h2 className="text-2xl font-bold text-[#FF5722] mb-4">HungerJet</h2>
-          <p className="text-[#4E342E] leading-relaxed">
-            HungerJet brings you the most delicious meals from your favorite restaurants, fast and fresh! Whether you're craving a cheesy pizza, a spicy biryani, or a sweet treat — we've got it delivered, hot and happy!
+          <img src={logoicon} className="mb-5 w-32" alt="HungerJet Logo" />
+          <p className="w-full md:w-2/3 text-gray-600">
+            HungerJet brings you the most delicious meals from your favorite restaurants, fast and fresh!
+            Whether you're craving a cheesy pizza, a spicy biryani, or a sweet treat — we've got it delivered, hot and happy!
           </p>
         </div>
 
         {/* Company Links */}
         <div>
-          <h3 className="text-lg font-semibold text-[#FF5722] mb-4">Company</h3>
-          <ul className="flex flex-col gap-2">
-            <li><a href="/" className="hover:text-[#FF7043]">Home</a></li>
-            <li><a href="/about" className="hover:text-[#FF7043]">About Us</a></li>
-            <li><a href="/faqs" className="hover:text-[#FF7043]">FAQs</a></li>
-            <li><a href="/contactus" className="hover:text-[#FF7043]">Contact Us</a></li>
+          <p className="text-xl font-medium mb-5">Company</p>
+          <ul className="flex flex-col gap-1 text-gray-600">
+            <li><a href="/" className="hover:text-orange-600">Home</a></li>
+            <li><a href="/about" className="hover:text-orange-600">About Us</a></li>
+            <li><a href="/faqs" className="hover:text-orange-600">FAQs</a></li>
+            <li><a href="/contactus" className="hover:text-orange-600">Contact Us</a></li>
           </ul>
         </div>
 
-        {/* Contact Section */}
+        {/* Contact Info */}
         <div>
-          <h3 className="text-lg font-semibold text-[#FF5722] mb-4">Get In Touch</h3>
-          <ul className="flex flex-col gap-3 text-[#4E342E]">
-            <li className="flex items-center gap-2">
-              <FaPhone className="text-[#FF7043]" />
+          <p className="text-xl font-medium mb-5">Get In Touch</p>
+          <ul className="flex flex-col gap-2 text-gray-600">
+            <li className="flex items-center space-x-2">
+              <FaPhone className="text-orange-600" />
               <span>+94-423-987-83</span>
             </li>
-            <li className="flex items-center gap-2">
-              <FaEnvelope className="text-[#FF7043]" />
+            <li className="flex items-center space-x-2">
+              <FaEnvelope className="text-orange-600" />
               <span>support@hungerjet.com</span>
             </li>
-            <li className="flex items-start gap-2">
-              <FaMapMarkerAlt className="text-[#FF7043] mt-1" />
+            <li className="flex items-start space-x-2">
+              <FaMapMarkerAlt className="text-orange-600 mt-1" />
               <span>No. 45, High Level Road, Nugegoda, Colombo 10250, Sri Lanka</span>
             </li>
           </ul>
         </div>
+
       </div>
 
-      {/* Divider & Bottom Text */}
-      <div className="border-t border-gray-200 text-center py-5 text-sm text-[#4E342E] font-medium">
-        © 2025 HungerJet. All Rights Reserved.
+      {/* Divider */}
+      <div className="mt-8 mb-4 border-t border-gray-200 pt-5 text-center font-semibold text-sm text-gray-600">
+        © 2025 HungerJet - All Rights Reserved.
       </div>
     </footer>
   );

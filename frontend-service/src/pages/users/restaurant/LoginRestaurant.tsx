@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const LoginRestaurant = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -43,7 +44,11 @@ const LoginRestaurant = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axios.post("http://localhost:3003/api/auth/login", form);
+      const res = await axios.post(
+        `${userUrl}/api/auth/login`,
+        form
+      );
+      console.log(`Login response: ${JSON.stringify(res)}`);
 
       const { token, user } = res.data;
 

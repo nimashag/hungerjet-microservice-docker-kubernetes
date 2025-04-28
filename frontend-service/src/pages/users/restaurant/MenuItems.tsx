@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "./RestaurantAdminLayout";
 import { Pencil, Trash2, PlusCircle, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const MySwal = withReactContent(Swal);
 
@@ -32,32 +33,15 @@ const MenuItems = () => {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [form, setForm] = useState<{
-    name: string;
-    description: string;
-    category: string;
-    price: number;
-    imageFile?: File;
-  }>({
-    name: "",
-    description: "",
-    category: "",
-    price: 0,
-  });
 
   const navigate = useNavigate();
 
   const fetchRestaurant = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://localhost:3001/api/restaurants/my",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setRestaurant(response.data[0]);
     } catch (error) {
       console.error("Error fetching restaurant:", error);
@@ -68,11 +52,9 @@ const MenuItems = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:3001/api/restaurants/my/menu-items",
+        `${restaurantUrl}/api/restaurants/my/menu-items`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setMenuItems(response.data);
@@ -113,67 +95,6 @@ const MenuItems = () => {
     new Set(menuItems.map((item) => item.category))
   );
 
-  const handleCreateSubmit = async () => {
-    // Validation
-    if (
-      !form.name.trim() ||
-      !form.description.trim() ||
-      !form.category.trim()
-    ) {
-      Swal.fire("Validation Error", "All fields are required.", "warning");
-      return;
-    }
-
-    if (!form.imageFile) {
-      Swal.fire("Validation Error", "Image is required.", "warning");
-      return;
-    }
-
-    if (isNaN(form.price) || form.price <= 0) {
-      Swal.fire(
-        "Validation Error",
-        "Price must be a valid positive number.",
-        "warning"
-      );
-      return;
-    }
-
-    // Check if restaurant is available
-    if (!restaurant) {
-      Swal.fire("Error", "Restaurant information is not available.", "error");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("description", form.description);
-    formData.append("category", form.category);
-    formData.append("price", form.price.toString());
-    formData.append("image", form.imageFile);
-
-    try {
-      const res = await axios.post(
-        `http://localhost:3001/api/restaurants/${restaurant._id}/menu-items`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      await fetchMenuItems();
-      Swal.fire("Success!", "Menu item created successfully!", "success");
-      setShowCreateModal(false);
-      setForm({ name: "", category: "", description: "", price: 0 });
-    } catch (err) {
-      console.error("Create error:", err);
-      Swal.fire("Error", "Failed to create menu item", "error");
-    }
-  };
-
   const handleDelete = async (id: string) => {
     const confirm = await MySwal.fire({
       title: "Are you sure?",
@@ -188,12 +109,9 @@ const MenuItems = () => {
     if (confirm.isConfirmed) {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(
-          `http://localhost:3001/api/restaurants/my/menu-items/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await axios.delete(`${restaurantUrl}/api/restaurants/my/menu-items/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setMenuItems(menuItems.filter((item) => item._id !== id));
         Swal.fire("Deleted!", "Menu item has been deleted.", "success");
       } catch (err) {
@@ -203,121 +121,40 @@ const MenuItems = () => {
     }
   };
 
-  const openEditModal = (item: MenuItem) => {
-    setEditingItem(item);
-    setForm({
-      name: item.name,
-      description: item.description,
-      category: item.category,
-      price: item.price,
-    });
-  };
-
-  const handleEditSubmit = async () => {
-    if (!editingItem) return;
-
-    // Basic validation
-    if (!form.name.trim()) {
-      Swal.fire("Validation Error", "Name is required.", "warning");
-      return;
-    }
-    if (!form.description.trim()) {
-      Swal.fire("Validation Error", "Description is required.", "warning");
-      return;
-    }
-    if (!form.category.trim()) {
-      Swal.fire("Validation Error", "Category is required.", "warning");
-      return;
-    }
-    if (isNaN(form.price) || form.price <= 0) {
-      Swal.fire(
-        "Validation Error",
-        "Price must be a positive number.",
-        "warning"
-      );
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("description", form.description);
-    formData.append("category", form.category);
-    formData.append("price", form.price.toString());
-
-    if (form.imageFile) {
-      formData.append("image", form.imageFile);
-    }
-
-    try {
-      await axios.put(
-        `http://localhost:3001/api/restaurants/my/menu-items/${editingItem._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setMenuItems((prev) =>
-        prev.map((item) =>
-          item._id === editingItem._id ? { ...item, ...form } : item
-        )
-      );
-
-      await fetchMenuItems();
-      Swal.fire("Updated!", "Menu item has been updated.", "success");
-      setEditingItem(null);
-    } catch (error) {
-      console.error("Error updating item:", error);
-      Swal.fire("Error", "Could not update item.", "error");
-    }
-  };
-
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  if (loading) return <div>Loading menu items...</div>;
+  if (loading) return <div className="p-6">Loading menu items...</div>;
 
   return (
     <AdminLayout>
-      <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Restaurant Menu-Items</h1>
-        <div className="flex justify-between items-center flex-wrap gap-4 mb-4">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-primary text-green-600 px-6 py-3 text-lg rounded-xl hover:bg-primary/90 transition whitespace-nowrap"
+      <div className="p-6 font-['Inter'] text-gray-800 dark:text-gray-100">
+        {/* Top Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          <Link
+            to="/restaurant-create-menu-item"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-full text-sm font-semibold shadow"
           >
             <PlusCircle size={18} />
             Create Menu Item
-          </button>
+          </Link>
 
-          <div className="flex items-center gap-4">
-            {/* Search input with icon */}
-            <div className="relative w-[220px]">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <Search size={16} />
-              </span>
+          <div className="flex gap-3 items-center w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <Search
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search..."
                 value={search}
                 onChange={handleSearchChange}
-                className="w-full pl-10 p-2 border border-neutral-300 rounded-xl focus:outline-none"
+                className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm w-full"
               />
             </div>
 
-            {/* Filter select */}
             <select
               value={filterCategory}
               onChange={handleCategoryFilter}
-              className="p-2 border border-neutral-300 rounded-xl min-w-[160px]"
+              className="pl-3 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -329,67 +166,51 @@ const MenuItems = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-white shadow-lg rounded-lg p-3">
-          <table className="min-w-full divide-y divide-neutral-200">
-            <thead className="bg-neutral-100">
+        {/* Table */}
+        <div className="rounded-xl bg-white dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <table className="min-w-full table-auto text-sm">
+            <thead className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 uppercase text-xs">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Image
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Category
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Description
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Price
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-neutral-600">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left">Image</th>
+                <th className="px-6 py-3 text-left">Name</th>
+                <th className="px-6 py-3 text-left">Category</th>
+                <th className="px-6 py-3 text-left">Description</th>
+                <th className="px-6 py-3 text-left">Price</th>
+                <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
               {filteredItems.map((item) => (
-                <tr key={item._id} className="hover:bg-neutral-50">
-                  <td className="px-4 py-3">
+                <tr
+                  key={item._id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <td className="px-6 py-4">
                     {item.image ? (
                       <img
-                        src={`http://localhost:3001/uploads/${item.image}`}
+                        src={`${restaurantUrl}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-neutral-200 rounded"></div>
+                      <div className="w-16 h-16 bg-gray-200 rounded" />
                     )}
                   </td>
-                  <td className="px-4 py-3 font-medium text-neutral-800">
-                    {item.name}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600">
-                    {item.category}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-600 ">
-                    {item.description}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-primary">
-                    ${item.price}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                  <td className="px-6 py-4 font-semibold">{item.name}</td>
+                  <td className="px-6 py-4">{item.category}</td>
+                  <td className="px-6 py-4">{item.description}</td>
+                  <td className="px-6 py-4">${item.price}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center items-center gap-3">
                       <button
-                        onClick={() => openEditModal(item)}
-                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => navigate(`/restaurant-update-menu-item/${item._id}`)}
+                        className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400"
                       >
                         <Pencil size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="text-red-600 hover:text-red-800"
+                        className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -397,9 +218,9 @@ const MenuItems = () => {
                   </td>
                 </tr>
               ))}
-              {menuItems.length === 0 && (
+              {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-4 text-neutral-500">
+                  <td colSpan={6} className="text-center p-6">
                     No menu items found.
                   </td>
                 </tr>
@@ -407,185 +228,6 @@ const MenuItems = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Edit Modal */}
-        {editingItem && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-              <h2 className="text-xl font-semibold mb-4">Edit Menu Item</h2>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  name="category"
-                  value={form.category}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Image
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      imageFile: e.target.files ? e.target.files[0] : undefined,
-                    }))
-                  }
-                  className="w-full"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setEditingItem(null)}
-                  className="bg-neutral-300 px-4 py-2 rounded hover:bg-neutral-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleEditSubmit}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showCreateModal && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-              <h2 className="text-xl font-semibold mb-4">Create Menu Item</h2>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  name="category"
-                  value={form.category}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-2">
-                <label className="block text-sm font-medium mb-1">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleFormChange}
-                  className="w-full border p-2 rounded"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Image</label>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      imageFile: e.target.files ? e.target.files[0] : undefined,
-                    }))
-                  }
-                  className="w-full"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="bg-neutral-300 px-4 py-2 rounded hover:bg-neutral-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateSubmit}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  Create
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </AdminLayout>
   );

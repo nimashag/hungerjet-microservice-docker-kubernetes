@@ -2,6 +2,7 @@ import React from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../api";
 
 interface CheckoutFormProps {
   clientSecret: string;
@@ -39,7 +40,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
         if (result.paymentIntent?.status === 'succeeded') {
           // Update the order status and payment status after successful payment
           await axios.patch(
-            `http://localhost:3002/api/orders/${orderId}/mark-paid`,
+            `${orderUrl}/api/orders/${orderId}/mark-paid`,
             {
               paymentMethod: "Stripe",
               transactionId: result.paymentIntent.id,

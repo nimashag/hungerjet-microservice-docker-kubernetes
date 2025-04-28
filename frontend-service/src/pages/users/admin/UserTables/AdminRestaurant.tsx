@@ -1,7 +1,22 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import AdminLayout from '../AdminLayout';
-import { CheckCircle, Trash2, Search, Filter } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import AdminLayout from "../AdminLayout";
+import { CheckCircle, Trash2, Search, Filter, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { userUrl } from "../../../../api";
+
+// Import logo (adjust path if needed)
+import logo from "../../../../assets/Logo.png";
+
+// Extend jsPDF
+declare module "jspdf" {
+  interface jsPDF {
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
 
 type RestaurantAdmin = {
   _id: string;
@@ -17,69 +32,117 @@ const AdminRestaurant = () => {
   const [restaurantAdmins, setRestaurantAdmins] = useState<RestaurantAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "approved" | "pending">("all");
 
   const fetchRestaurantAdmins = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:3003/api/auth/all', {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${userUrl}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const filtered = res.data.filter((user: RestaurantAdmin) => user.role === 'restaurantAdmin');
+      const filtered = res.data.filter(
+        (user: RestaurantAdmin) => user.role === "restaurantAdmin"
+      );
       setRestaurantAdmins(filtered);
     } catch (err: any) {
-      console.error('Failed to fetch restaurant admins:', err);
-      setError('Failed to load restaurant admin data.');
+      console.error("Failed to fetch restaurant admins:", err);
+      setError("Failed to load restaurant admin data.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchRestaurantAdmins();
+  }, []);
+
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this restaurant admin?')) return;
+    if (!window.confirm("Are you sure you want to delete this restaurant admin?")) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3003/api/auth/${id}`, {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${userUrl}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRestaurantAdmins(prev => prev.filter(admin => admin._id !== id));
+      setRestaurantAdmins((prev) => prev.filter((admin) => admin._id !== id));
     } catch {
-      alert('Failed to delete user');
+      alert("Failed to delete user");
     }
   };
 
   const handleApprove = async (id: string) => {
-    if (!window.confirm('Approve this restaurant admin?')) return;
+    if (!window.confirm("Approve this restaurant admin?")) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:3003/api/auth/${id}`,
+        `${userUrl}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setRestaurantAdmins(prev =>
-        prev.map(admin => (admin._id === id ? { ...admin, isApproved: true } : admin))
+      setRestaurantAdmins((prev) =>
+        prev.map((admin) =>
+          admin._id === id ? { ...admin, isApproved: true } : admin
+        )
       );
     } catch {
-      alert('Failed to approve user');
+      alert("Failed to approve user");
     }
   };
 
   const filteredAdmins = restaurantAdmins
-    .filter(admin =>
-      admin.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      admin.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (admin) =>
+        admin.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        admin.email?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .filter(admin => {
-      if (approvalFilter === 'approved') return admin.isApproved;
-      if (approvalFilter === 'pending') return !admin.isApproved;
+    .filter((admin) => {
+      if (approvalFilter === "approved") return admin.isApproved;
+      if (approvalFilter === "pending") return !admin.isApproved;
       return true;
     });
 
-  useEffect(() => {
-    fetchRestaurantAdmins();
-  }, []);
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    const reportId = `RA-${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}${now.getHours()}${now.getMinutes()}`;
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Logo
+    doc.addImage(logo, "PNG", 14, 10, 30, 30);
+
+    // Title and details
+    doc.setFontSize(18);
+    doc.text("HungerJet Restaurant Admins Report", pageWidth / 2, 20, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Generated On: ${formattedDate} at ${formattedTime}`, 14, 45);
+    doc.text(`Report ID: ${reportId}`, 14, 51);
+
+    // Table
+    autoTable(doc, {
+      startY: 60,
+      head: [["No", "Name", "Email", "Phone", "Address", "Approved"]],
+      body: filteredAdmins.map((admin, i) => [
+        i + 1,
+        admin.name || "-",
+        admin.email || "-",
+        admin.phone || "-",
+        admin.address || "-",
+        admin.isApproved ? "Yes" : "No",
+      ]),
+    });
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
+    doc.text("Admin: John Doe", 14, pageHeight - 20);
+    doc.text("Signature: ___________________", pageWidth - 80, pageHeight - 20);
+
+    doc.save(`Restaurant_Admins_Report_${now.toISOString().slice(0, 10)}.pdf`);
+  };
 
   return (
     <AdminLayout>
@@ -89,21 +152,27 @@ const AdminRestaurant = () => {
 
           <div className="flex gap-3 items-center w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Search
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500 w-full"
               />
             </div>
 
             <div className="relative">
-              <Filter className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Filter
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <select
                 value={approvalFilter}
-                onChange={e => setApprovalFilter(e.target.value as any)}
+                onChange={(e) => setApprovalFilter(e.target.value as any)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="all">All</option>
@@ -111,6 +180,14 @@ const AdminRestaurant = () => {
                 <option value="pending">Pending</option>
               </select>
             </div>
+
+            <button
+              onClick={generatePDF}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+            >
+              <Download size={16} />
+              Download Report
+            </button>
           </div>
         </div>
 
@@ -136,10 +213,10 @@ const AdminRestaurant = () => {
                 {filteredAdmins.map((admin, index) => (
                   <tr key={admin._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-3">{index + 1}</td>
-                    <td className="px-6 py-3">{admin.name || '-'}</td>
-                    <td className="px-6 py-3">{admin.email || '-'}</td>
-                    <td className="px-6 py-3">{admin.phone || '-'}</td>
-                    <td className="px-6 py-3">{admin.address || '-'}</td>
+                    <td className="px-6 py-3">{admin.name || "-"}</td>
+                    <td className="px-6 py-3">{admin.email || "-"}</td>
+                    <td className="px-6 py-3">{admin.phone || "-"}</td>
+                    <td className="px-6 py-3">{admin.address || "-"}</td>
                     <td className="px-6 py-3">
                       {admin.isApproved ? (
                         <CheckCircle className="text-green-500" size={20} />

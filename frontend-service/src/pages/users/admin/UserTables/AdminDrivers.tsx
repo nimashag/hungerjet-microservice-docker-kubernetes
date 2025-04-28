@@ -1,7 +1,22 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import AdminLayout from '../AdminLayout';
-import { CheckCircle, Trash2, Search, Filter } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import AdminLayout from "../AdminLayout";
+import { CheckCircle, Trash2, Search, Filter, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { userUrl } from "../../../../api";
+
+// Import your logo (adjust path as needed)
+import logo from "../../../../assets/Logo.png";
+
+// Extend jsPDF
+declare module "jspdf" {
+  interface jsPDF {
+    lastAutoTable: {
+      finalY: number;
+    };
+  }
+}
 
 type Driver = {
   _id: string;
@@ -17,67 +32,115 @@ const AdminDrivers = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "approved" | "pending">("all");
 
   const fetchDrivers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:3003/api/auth/all', {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${userUrl}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const onlyDrivers = res.data.filter((user: Driver) => user.role === 'deliveryPersonnel');
+      const onlyDrivers = res.data.filter(
+        (user: Driver) => user.role === "deliveryPersonnel"
+      );
       setDrivers(onlyDrivers);
     } catch (err: any) {
-      console.error('Failed to fetch drivers:', err);
-      setError('Failed to load delivery drivers.');
+      console.error("Failed to fetch drivers:", err);
+      setError("Failed to load delivery drivers.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this delivery driver?')) return;
+    if (!window.confirm("Are you sure you want to delete this delivery driver?")) return;
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3003/api/auth/${id}`, {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${userUrl}/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDrivers(prev => prev.filter(d => d._id !== id));
+      setDrivers((prev) => prev.filter((d) => d._id !== id));
     } catch {
-      alert('Failed to delete user');
+      alert("Failed to delete user");
     }
   };
 
   const handleApprove = async (id: string) => {
-    if (!window.confirm('Approve this delivery driver?')) return;
+    if (!window.confirm("Approve this delivery driver?")) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:3003/api/auth/${id}`,
+        `${userUrl}/api/auth/${id}`,
         { isApproved: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setDrivers(prev => prev.map(d => (d._id === id ? { ...d, isApproved: true } : d)));
+      setDrivers((prev) =>
+        prev.map((d) => (d._id === id ? { ...d, isApproved: true } : d))
+      );
     } catch {
-      alert('Failed to approve user');
+      alert("Failed to approve user");
     }
   };
 
   const filteredDrivers = drivers
-    .filter(d =>
-      d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (d) =>
+        d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.email?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .filter(d => {
-      if (approvalFilter === 'approved') return d.isApproved;
-      if (approvalFilter === 'pending') return !d.isApproved;
+    .filter((d) => {
+      if (approvalFilter === "approved") return d.isApproved;
+      if (approvalFilter === "pending") return !d.isApproved;
       return true;
     });
 
-  useEffect(() => {
-    fetchDrivers();
-  }, []);
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    const reportId = `DR-${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}${now.getHours()}${now.getMinutes()}`;
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Add Logo
+    doc.addImage(logo, "PNG", 14, 10, 30, 30);
+
+    // Title and Meta
+    doc.setFontSize(18);
+    doc.text("HungerJet Drivers Report", pageWidth / 2, 20, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.text(`Generated On: ${formattedDate} at ${formattedTime}`, 14, 45);
+    doc.text(`Report ID: ${reportId}`, 14, 51);
+
+    // Table
+    autoTable(doc, {
+      startY: 60,
+      head: [["No", "Name", "Email", "Phone", "Address", "Approved"]],
+      body: filteredDrivers.map((d, i) => [
+        i + 1,
+        d.name || "-",
+        d.email || "-",
+        d.phone || "-",
+        d.address || "-",
+        d.isApproved ? "Yes" : "No",
+      ]),
+    });
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
+    doc.text("Admin: John Doe", 14, pageHeight - 20);
+    doc.text("Signature: ___________________", pageWidth - 80, pageHeight - 20);
+
+    doc.save(`Drivers_Report_${now.toISOString().slice(0, 10)}.pdf`);
+  };
 
   return (
     <AdminLayout>
@@ -87,21 +150,27 @@ const AdminDrivers = () => {
 
           <div className="flex gap-3 items-center w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Search
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500 w-full"
               />
             </div>
 
             <div className="relative">
-              <Filter className="absolute left-3 top-3 text-gray-400 dark:text-gray-500" size={18} />
+              <Filter
+                className="absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+                size={18}
+              />
               <select
                 value={approvalFilter}
-                onChange={e => setApprovalFilter(e.target.value as any)}
+                onChange={(e) => setApprovalFilter(e.target.value as any)}
                 className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="all">All</option>
@@ -109,6 +178,14 @@ const AdminDrivers = () => {
                 <option value="pending">Pending</option>
               </select>
             </div>
+
+            <button
+              onClick={generatePDF}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+            >
+              <Download size={16} />
+              Download Report
+            </button>
           </div>
         </div>
 
@@ -134,10 +211,10 @@ const AdminDrivers = () => {
                 {filteredDrivers.map((driver, index) => (
                   <tr key={driver._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-3">{index + 1}</td>
-                    <td className="px-6 py-3">{driver.name || '-'}</td>
-                    <td className="px-6 py-3">{driver.email || '-'}</td>
-                    <td className="px-6 py-3">{driver.phone || '-'}</td>
-                    <td className="px-6 py-3">{driver.address || '-'}</td>
+                    <td className="px-6 py-3">{driver.name || "-"}</td>
+                    <td className="px-6 py-3">{driver.email || "-"}</td>
+                    <td className="px-6 py-3">{driver.phone || "-"}</td>
+                    <td className="px-6 py-3">{driver.address || "-"}</td>
                     <td className="px-6 py-3">
                       {driver.isApproved ? (
                         <CheckCircle className="text-green-500" size={20} />
@@ -163,7 +240,9 @@ const AdminDrivers = () => {
               </tbody>
             </table>
             {filteredDrivers.length === 0 && (
-              <p className="p-6 text-center text-gray-500 dark:text-gray-400">No delivery drivers found.</p>
+              <p className="p-6 text-center text-gray-500 dark:text-gray-400">
+                No delivery drivers found.
+              </p>
             )}
           </div>
         )}

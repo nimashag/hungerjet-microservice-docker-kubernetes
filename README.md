@@ -167,6 +167,7 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 # Check pods
 kubectl get pods
 kubectl get pods,svc,cm -o wide
+kubectl get all,cm,pv,pvc -o wide
 
 # Check services
 kubectl get svc

@@ -64,7 +64,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     { name: 'Drivers', href: '/admin/drivers', icon: Truck },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
     // name: 'Approvals', href: '/admin/approvals', icon: Bell },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    //{ name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
   return (

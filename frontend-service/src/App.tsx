@@ -5,8 +5,6 @@ import MenuItems from "./pages/users/restaurant/MenuItems";
 import RestaurantOrders from "./pages/users/restaurant/RestaurantOrdersPage";
 import RestaurantAnalytics from "./pages/users/restaurant/RestaurantAnalytics";
 
-import Orders from './pages/Orders';
-
 import PaymentPage from './pages/PaymentPage';
 
 import LoginCustomer from './pages/users/customer/LoginCustomer';
@@ -30,6 +28,14 @@ import AdminCustomers from './pages/users/admin/UserTables/AdminCustomer';
 import AdminRestaurant from './pages/users/admin/UserTables/AdminRestaurant';
 import AdminDrivers from './pages/users/admin/UserTables/AdminDrivers';
 import AdminAnalytics from './pages/users/admin/AdminAnalytics';
+import CreateMenuItem from './pages/users/restaurant/CreateMenuItem';
+import UpdateMenuItem from './pages/users/restaurant/UpdateMenuItem';
+import CreateRestaurant from './pages/users/restaurant/CreateRestaurant';
+import EditRestaurant from './pages/users/restaurant/EditRestaurant';
+import About from './pages/users/customer/components/About';
+import ContactUs from './pages/users/customer/components/ContactUs';
+import FAQs from './pages/users/customer/components/FAQs';
+import Reviews from './pages/users/customer/components/Reviews';
 
 function App() {
     return (
@@ -46,9 +52,10 @@ function App() {
                 <Route path="/restaurant-menu" element={<MenuItems />} />
                 <Route path="/restaurant-orders" element={<RestaurantOrders />}/>
                 <Route path="/restaurant-analytics" element={<RestaurantAnalytics />} />
-
-                {/* Orders routes */}
-                <Route path="/orders" element={<Orders />} />
+                <Route path='/restaurant-create-menu-item' element={<CreateMenuItem />} />
+                <Route path="/restaurant-update-menu-item/:id" element={<UpdateMenuItem />} />
+                <Route path='/restaurant/create' element={<CreateRestaurant />} />
+                <Route path='/restaurant/edit/:id' element={<EditRestaurant />} />
 
                 {/* Login routes */}
                 <Route path="/login/customer" element={<LoginCustomer />} />
@@ -69,6 +76,10 @@ function App() {
                 <Route path="/restaurants" element={<RestaurantList />} />
                 <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path='/about' element={<About />} />
+                <Route path='/contactus' element={<ContactUs />} />
+                <Route path='/faqs' element={<FAQs />} />
+                <Route path='/reviews' element={<Reviews />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />

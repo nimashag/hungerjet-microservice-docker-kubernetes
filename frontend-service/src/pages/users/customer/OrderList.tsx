@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../../components/Navbar"; // adjust path if needed
 import { useNavigate } from "react-router-dom";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 interface OrderItem {
   menuItemId: string;
@@ -42,7 +43,7 @@ const OrderList: React.FC = () => {
           return;
         }
 
-        const res = await axios.get("http://localhost:3002/api/orders", {
+        const res = await axios.get(`${orderUrl}/api/orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -132,7 +133,7 @@ const OrderList: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="max-w-6xl mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-800">Orders</h1>
           <p className="text-gray-500 text-sm">Manage and track your recent orders</p>

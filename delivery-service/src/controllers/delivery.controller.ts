@@ -5,6 +5,7 @@ import { createDelivery, findDeliveryByOrderId, updateDeliveryAcceptance, findAs
 import { Driver } from '../models/driver.model';
 import axios from 'axios';
 import { Delivery } from '../models/delivery.model';
+import { sendSMS } from '../services/sms.service';
 
 const ORDER_SERVICE_BASE_URL = 'http://localhost:3002/api/orders';
 const USER_SERVICE_BASE_URL = 'http://localhost:3003/api/auth';  
@@ -219,6 +220,10 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
       const customerEmail = 'lavinduyomith2016@gmail.com';
       const customerName = user.name;
       const deliveryAddress = order.deliveryAddress;
+      const customerPhone = '+94778964821';  //have to change this to the user phone number
+      
+      
+      
 
       // Email subject and content
       const subject = `Your Order with HungerJet has been Delivered!`;
@@ -231,12 +236,21 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
         HungerJet Team
       `;
 
+      const message = `Hello, your order has been delivered to ${deliveryAddress?.street}, ${deliveryAddress?.city}. Thank you for choosing HungerJet!`;
+      
+
       // Send the email to the customer
       if (customerEmail) {
         await sendEmail(customerEmail, subject, text); // Send email notification
       }
+      // Send SMS if the phone number exists
+    if (customerPhone) {
+      await sendSMS(customerPhone, message);  // Send SMS notification
+    }
+    
     }
 
+    
     res.status(200).json({ message: 'Delivery status updated successfully', updatedDelivery });
   } catch (error: any) {
     console.error(error);

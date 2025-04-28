@@ -38,7 +38,7 @@ export const updateDeliveryAcceptance = async (delivery: DeliveryDocument, actio
 
 // ✅ Find assigned deliveries for a driver (Pending acceptance)
 export const findAssignedDeliveriesForDriver = async (driverId: string): Promise<DeliveryDocument[]> => {
-  return Delivery.find({ driverId, acceptStatus: 'Pending' });
+  return Delivery.find({ driverId,status: 'Assigned' ,acceptStatus: 'Pending' });
 };
 
 // ✅ Fetch all deliveries for driver (Ongoing + Completed)

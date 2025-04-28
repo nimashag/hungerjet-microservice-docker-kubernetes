@@ -94,7 +94,6 @@ export const respondToAssignment = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error responding to assignment', error: error.message });
   }
 };
-
 export const getAssignedOrders = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;

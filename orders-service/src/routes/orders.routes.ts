@@ -20,6 +20,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), ctrl.strip
 router.patch('/:id/mark-paid', authenticate, ctrl.markOrderAsPaid);
 
 // Update just the order status
-router.patch('/:id/status', authenticate, authorizeRoles("admin", "restaurantAdmin"), ctrl.updateOrderStatus);
+router.patch('/:id/status', authenticate, authorizeRoles("admin", "restaurantAdmin", "deliveryPersonnel"), ctrl.updateOrderStatus);
+
 
 export default router;

@@ -301,34 +301,49 @@ export const markOrderAsPaid = async (req: AuthenticatedRequest, res: Response) 
 export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-    
+
     const { status } = req.body;
     const orderId = req.params.id;
-    
+
     if (!status) {
       return res.status(400).json({ message: "Status is required" });
     }
-    
+
     // For restaurant admin, verify they own this order's restaurant
     if (req.user.role === 'restaurantAdmin') {
       const order = await OrdersService.getOrderById(orderId);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       // Check if admin has restaurantId and if order belongs to admin's restaurant
       if (!req.user.restaurantId || order.restaurantId.toString() !== req.user.restaurantId) {
         return res.status(403).json({ message: "Not authorized to update this order" });
       }
     }
-    
+
+    // Allow deliveryPersonnel to update order status
+    if (req.user.role === 'deliveryPersonnel') {
+      const order = await OrdersService.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      if (status === 'Delivered') {
+        // Ensure the order is in the 'PickedUp' state before marking as 'Delivered'
+        if (order.status !== 'PickedUp') { 
+          return res.status(400).json({ message: "Order must be in 'PickedUp' status before being marked as 'Delivered'" });
+        }
+      }
+    }
+
     console.log(`▶️ Updating status for order ${orderId} to ${status}`);
     const updatedOrder = await OrdersService.updateOrderStatus(orderId, status);
-    
+
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
-    
+
     console.log(`✅ Updated order status: ${updatedOrder._id}`);
     res.json(updatedOrder);
   } catch (err) {

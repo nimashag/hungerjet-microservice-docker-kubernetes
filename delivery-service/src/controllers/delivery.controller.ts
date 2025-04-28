@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
+import { sendEmail } from '../services/email.service'; 
 import { findAvailableDriver, markDriverAvailability } from '../services/driver.service';
 import { createDelivery, findDeliveryByOrderId, updateDeliveryAcceptance, findAssignedDeliveriesForDriver ,findAllDeliveriesForDriver, updateDeliveryStatusById } from '../services/delivery.service';
 import { Driver } from '../models/driver.model';
+import { Delivery } from '../models/delivery.model';
 import axios from 'axios';
 
+const ORDER_SERVICE_BASE_URL = 'http://localhost:3002/api/orders'; 
+const USER_SERVICE_BASE_URL = 'http://localhost:3003/api/users';  
 
-const ORDER_SERVICE_BASE_URL = 'http://localhost:3002/api/orders';
 
 export const assignDriverAutomatically = async (req: Request, res: Response) => {
   const { orderId, customerId, restaurantId } = req.body;
@@ -185,25 +188,65 @@ export const getMyDeliveries = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ Update Delivery Status
+
+
 export const updateDeliveryStatus = async (req: Request, res: Response) => {
   try {
-    const { deliveryId } = req.params;
-    const { status } = req.body;
+    const { deliveryId } = req.params;  // Delivery ID from the URL
+    const { status } = req.body;  // Status to update to (PickedUp, Delivered, Cancelled)
 
+    // Validating the status update
     const allowedStatuses = ['PickedUp', 'Delivered', 'Cancelled'];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const updatedDelivery = await updateDeliveryStatusById(deliveryId, status);
+    // 1️⃣ Update the delivery status in the Delivery collection
+    const updatedDelivery = await Delivery.findByIdAndUpdate(deliveryId, { status }, { new: true });
     if (!updatedDelivery) {
       return res.status(404).json({ message: 'Delivery not found' });
     }
 
+    // 2️⃣ If the delivery is marked as 'Delivered', update the order status and send email to the customer
+    if (status === 'Delivered') {
+      // Fetch the order details using the updated delivery's orderId
+      const orderRes = await axios.get(`${ORDER_SERVICE_BASE_URL}/${updatedDelivery.orderId}`);
+      const order = orderRes.data;
+      console.log("Order details:", order);
+
+      // Fetch the customer details using the userId from the order
+      const userRes = await axios.get(`${USER_SERVICE_BASE_URL}/${order.userId}`);
+      const user = userRes.data;
+
+      console.log("User details:", user); 
+
+      const customerEmail ='lavinduyomith2016@gmail.com';  // Customer's email
+      const customerName = user.name;  // Customer's name
+      const deliveryAddress = order.deliveryAddress;  // Customer's delivery address
+
+      // Prepare email content
+      const subject = 'Your Order with HungerJet has been Delivered!';
+      const text = `
+        Hello ${customerName},\n\n
+        We are happy to inform you that your order with HungerJet has been successfully delivered to your address: 
+        ${deliveryAddress?.street}, ${deliveryAddress?.city}.\n\n
+        Thank you for choosing HungerJet, and we look forward to serving you again soon!\n\n
+        Best regards,\n
+        HungerJet Team
+      `;
+
+      // Send email to customer if email exists
+      if (customerEmail) {
+        await sendEmail(customerEmail, subject, text);  // Send the email to the customer
+      }
+
+      // 3️⃣ Also update the status of the corresponding order to 'Delivered'
+      await axios.patch(`${ORDER_SERVICE_BASE_URL}/${updatedDelivery.orderId}/status`, { status: 'Delivered' });
+    }
+
     res.status(200).json({ message: 'Delivery status updated successfully', updatedDelivery });
   } catch (error: any) {
-    console.error(error);
+    console.error("Error updating delivery status:", error);
     res.status(500).json({ message: 'Error updating delivery status', error: error.message });
   }
 };

@@ -3,12 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const DriverProfileRegister = () => {
-  const [pickupLocation, setPickupLocation] = useState('');
-  const [deliveryLocations, setDeliveryLocations] = useState('');
   const [vehicleRegNumber, setVehicleRegNumber] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [isAvailable, setIsAvailable] = useState(true);
 
   const navigate = useNavigate();
   const DRIVER_API = 'http://localhost:3004'; // Driver service
@@ -25,15 +21,8 @@ const DriverProfileRegister = () => {
 
     try {
       const formData = new FormData();
-      formData.append('pickupLocation', pickupLocation);
-      formData.append('deliveryLocations', deliveryLocations); 
       formData.append('vehicleRegNumber', vehicleRegNumber);
       formData.append('mobileNumber', mobileNumber);
-      formData.append('isAvailable', isAvailable ? 'true' : 'false');
-
-      if (profileImage) {
-        formData.append('profileImage', profileImage);
-      }
 
       await axios.post(`${DRIVER_API}/api/drivers/register`, formData, {
         headers: {
@@ -66,28 +55,6 @@ const DriverProfileRegister = () => {
             <div>
               <input
                 type="text"
-                placeholder="Pickup Location (eg: Malabe)"
-                value={pickupLocation}
-                onChange={(e) => setPickupLocation(e.target.value)}
-                className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="Delivery Locations (comma separated)"
-                value={deliveryLocations}
-                onChange={(e) => setDeliveryLocations(e.target.value)}
-                className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-            </div>
-
-            <div>
-              <input
-                type="text"
                 placeholder="Vehicle Registration Number (eg: ABC-1234)"
                 value={vehicleRegNumber}
                 onChange={(e) => setVehicleRegNumber(e.target.value)}
@@ -105,25 +72,6 @@ const DriverProfileRegister = () => {
                 className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
-            </div>
-
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProfileImage(e.target.files?.[0] || null)}
-                className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                checked={isAvailable}
-                onChange={(e) => setIsAvailable(e.target.checked)}
-                className="h-5 w-5 text-green-500"
-              />
-              <span className="text-gray-700 text-sm">Available for delivery</span>
             </div>
 
             <div className="relative w-full mt-2">

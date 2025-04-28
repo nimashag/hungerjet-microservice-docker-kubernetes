@@ -36,6 +36,8 @@ const DriverDashboard = () => {
 
   const handleResponse = async (orderId: string, action: 'accept' | 'decline') => {
     const token = localStorage.getItem('token');
+    console.log('Accepted order ID:', orderId);
+    console.log('Action:', action);
 
     if (!token) {
       console.log('No token found while responding. Redirecting to login.');
@@ -71,6 +73,7 @@ const DriverDashboard = () => {
               <div className="flex gap-4 mt-4">
                 <button
                   onClick={() => handleResponse(order.orderId, 'accept')}
+                  
                   className="bg-green-500 text-white p-2 rounded"
                 >
                   Accept

@@ -5,7 +5,8 @@ import {
   getMyProfile,
   getAllUsers,
   updateUserById,
-  deleteUserById
+  deleteUserById,
+  getUserById
 } from '../controllers/users.authcontroller';
 import { authenticate } from '../middleware/authMiddleware';
 import { isAppAdmin } from '../middleware/role.middleware';
@@ -16,7 +17,10 @@ const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
+
+
 // Protected route
+router.get('/:id', getUserById);
 router.get('/me', authenticate, getMyProfile);
 
 // Admin-only routes (requires appAdmin role)

@@ -4,6 +4,8 @@ import DriverLayout from './DriverLayout';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
+
 interface Delivery {
   _id: string;
   orderId: string;
@@ -60,6 +62,9 @@ const DriverMyDeliveries = () => {
     if (!modalDeliveryId || !modalAction) return;
     try {
       const token = localStorage.getItem('token');
+      console.log('Updating delivery status:', modalDeliveryId, modalAction);
+      
+      // Call the backend API to update both delivery status and order status
       await axios.patch(`${API_BASE}/api/delivery/delivery/${modalDeliveryId}/status`, 
         { status: modalAction },
         {
@@ -79,6 +84,7 @@ const DriverMyDeliveries = () => {
       setShowModal(false);
     }
   };
+  
 
   const ongoingDeliveries = deliveries.filter(
     (d) => d.status === 'Assigned' || d.status === 'PickedUp'

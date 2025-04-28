@@ -3,6 +3,7 @@ import UserModel, { IUser } from '../models/users.model';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
+
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
@@ -132,5 +133,23 @@ export const deleteUserById = async (req: Request, res: Response) => {
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete user', error: err });
+  }
+};
+
+
+// Fetch user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const user = await UserModel.findById(userId); //error:Cannot find name 'User'. Did you mean 'user'?ts(2552)
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ message: 'Error fetching user data' });
   }
 };

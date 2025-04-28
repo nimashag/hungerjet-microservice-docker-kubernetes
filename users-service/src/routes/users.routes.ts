@@ -5,7 +5,8 @@ import {
   getMyProfile,
   getAllUsers,
   updateUserById,
-  deleteUserById
+  deleteUserById,
+  getUserById
 } from '../controllers/users.authcontroller';
 import { authenticate } from '../middleware/authMiddleware';
 import { isAppAdmin } from '../middleware/role.middleware';
@@ -15,6 +16,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+router.get('/:id', getUserById);
 
 // Protected route
 router.get('/me', authenticate, getMyProfile);

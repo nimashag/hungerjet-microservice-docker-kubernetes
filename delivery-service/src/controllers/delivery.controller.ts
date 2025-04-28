@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
+import { sendEmail } from '../services/email.service'; 
 import { findAvailableDriver, markDriverAvailability } from '../services/driver.service';
 import { createDelivery, findDeliveryByOrderId, updateDeliveryAcceptance, findAssignedDeliveriesForDriver ,findAllDeliveriesForDriver, updateDeliveryStatusById } from '../services/delivery.service';
 import { Driver } from '../models/driver.model';
 import axios from 'axios';
-
+import { Delivery } from '../models/delivery.model';
 
 const ORDER_SERVICE_BASE_URL = 'http://localhost:3002/api/orders';
+const USER_SERVICE_BASE_URL = 'http://localhost:3003/api/auth';  
+
 
 export const assignDriverAutomatically = async (req: Request, res: Response) => {
   const { orderId, customerId, restaurantId } = req.body;
@@ -198,6 +201,40 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
     const updatedDelivery = await updateDeliveryStatusById(deliveryId, status);
     if (!updatedDelivery) {
       return res.status(404).json({ message: 'Delivery not found' });
+    }
+
+    // Step 2: If the status is "Delivered", send an email to the customer
+    if (status === 'Delivered') {
+      // Fetch the order details to get the userId
+      const orderRes = await axios.get(`${ORDER_SERVICE_BASE_URL}/${updatedDelivery.orderId}`);
+      const order = orderRes.data;
+      console.log(orderRes.data);
+
+      // Fetch the customer details from the user service using userId
+      const userRes = await axios.get(`${USER_SERVICE_BASE_URL}/${order.userId}`);
+      const user = userRes.data;
+      console.log(user);
+
+      // Email details
+      const customerEmail = 'lavinduyomith2016@gmail.com';
+      const customerName = user.name;
+      const deliveryAddress = order.deliveryAddress;
+
+      // Email subject and content
+      const subject = `Your Order with HungerJet has been Delivered!`;
+      const text = `
+        Hello ${customerName},\n\n
+        We are happy to inform you that your order with HungerJet has been successfully delivered to your address: 
+        ${deliveryAddress?.street}, ${deliveryAddress?.city}.\n\n
+        Thank you for choosing HungerJet, and we look forward to serving you again soon!\n\n
+        Best regards,\n
+        HungerJet Team
+      `;
+
+      // Send the email to the customer
+      if (customerEmail) {
+        await sendEmail(customerEmail, subject, text); // Send email notification
+      }
     }
 
     res.status(200).json({ message: 'Delivery status updated successfully', updatedDelivery });

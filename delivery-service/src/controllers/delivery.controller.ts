@@ -1,37 +1,209 @@
 import { Request, Response } from 'express';
-import * as DeliveryService from '../services/delivery.service';
+import { findAvailableDriver, markDriverAvailability } from '../services/driver.service';
+import { createDelivery, findDeliveryByOrderId, updateDeliveryAcceptance, findAssignedDeliveriesForDriver ,findAllDeliveriesForDriver, updateDeliveryStatusById } from '../services/delivery.service';
+import { Driver } from '../models/driver.model';
+import axios from 'axios';
 
-export const createDelivery = async (req: Request, res: Response) => {
-  const delivery = await DeliveryService.createDelivery(req.body);
-  res.status(201).json(delivery);
+
+const ORDER_SERVICE_BASE_URL = 'http://localhost:3002/api/orders';
+
+export const assignDriverAutomatically = async (req: Request, res: Response) => {
+  const { orderId, customerId, restaurantId } = req.body;
+ console.log('Received orderId:', orderId,'customerId:', customerId, 'restaurantId:', restaurantId);
+  try {
+    const restaurantRes = await axios.get(`http://localhost:3001/api/restaurants/${restaurantId}`); //3001
+    const restaurant = restaurantRes.data;
+
+
+    if (!restaurant.available) return res.status(400).json({ message: 'Restaurant not available' });
+
+    const orderRes = await axios.get(`http://localhost:3002/api/orders/${orderId}`);
+    const order = orderRes.data;
+
+    const driver = await findAvailableDriver(restaurant.location, order.deliveryAddress.city);
+
+    if (!driver) return res.status(404).json({ message: 'No matching driver available' });
+
+    const delivery = await createDelivery({
+      orderId,
+      customerId,
+      restaurantLocation: restaurant.location,
+      deliveryLocation: order.deliveryAddress.city,
+      driverId: driver._id.toString(),
+    });
+
+    await markDriverAvailability(driver._id.toString(), false);
+
+    res.status(200).json({ message: 'Driver assigned', delivery });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error assigning driver', error: error.message });
+  }
 };
 
-export const assignDriver = async (req: Request, res: Response) => {
-  const result = await DeliveryService.assignDriver(req.params.id);
-  res.status(200).json(result);
+export const respondToAssignment = async (req: Request, res: Response) => {
+  const { orderId, action } = req.body;
+
+  try {
+    const delivery = await findDeliveryByOrderId(orderId);
+    if (!delivery) return res.status(404).json({ message: 'Delivery not found' });
+
+    await updateDeliveryAcceptance(delivery, action);
+
+    if (action === 'decline') {
+      console.log('Driver declined, attempting to reassign...');
+
+      try {
+        const orderRes = await axios.get(`${ORDER_SERVICE_BASE_URL}/${orderId}`);
+        const order = orderRes.data;
+
+        const newDriver = await findAvailableDriver(delivery.restaurantLocation, order.deliveryAddress.city);
+
+        if (newDriver) {
+          console.log('✅ Found another driver:', newDriver._id);
+
+          // Assign delivery to new driver
+          delivery.driverId = newDriver._id.toString();
+          delivery.acceptStatus = 'Pending';
+          delivery.status = 'Assigned';
+          await delivery.save();
+
+          await markDriverAvailability(newDriver._id.toString(), false);
+
+          return res.status(200).json({ message: 'Delivery reassigned to another driver', delivery });
+        } else {
+          console.log('❌ No available driver to reassign.');
+          // Delivery remains pending without a driver
+          delivery.driverId = undefined;
+          delivery.acceptStatus = 'Pending';
+          delivery.status = 'Pending';
+          await delivery.save();
+
+          return res.status(200).json({ message: 'No driver available to reassign. Delivery pending.', delivery });
+        }
+      } catch (error) {
+        console.error('Error during reassignment:', error);
+        return res.status(500).json({ message: 'Error reassigning delivery', error: (error as Error).message });
+      }
+    }
+
+    // Normal accept case
+    return res.status(200).json({ message: `Assignment ${action}ed`, delivery });
+
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: 'Error responding to assignment', error: error.message });
+  }
 };
 
-export const acceptDelivery = async (req: Request, res: Response) => {
-  const result = await DeliveryService.acceptDelivery(req.params.id, req.body.driverId);
-  res.status(200).json(result);
+export const getAssignedOrders = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    console.log("Token User ID:", userId);
+
+    // 1️⃣ Find Driver by userId
+    const driver = await Driver.findOne({ userId });
+    if (!driver) {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    console.log("Driver _id:", driver._id);
+
+    // 2️⃣ Find assigned deliveries
+    const deliveries = await findAssignedDeliveriesForDriver(driver._id.toString());
+
+    // 3️⃣ Fetch full deliveryAddress for each order
+    const enhancedDeliveries = await Promise.all(
+      deliveries.map(async (delivery) => {
+        try {
+          const orderRes = await axios.get(`${ORDER_SERVICE_BASE_URL}/${delivery.orderId}`);
+          const order = orderRes.data;
+
+          return {
+            ...delivery.toObject(), // convert mongoose document to plain object
+            deliveryAddress: order.deliveryAddress || null,
+            paymentStatus: order.paymentStatus || null,
+            customerId: order.userId || null,
+            restaurantId: order.restaurantId || null,
+            specialInstructions: order.specialInstructions || "",
+          };
+        } catch (err) {
+          console.error(`Failed fetching order ${delivery.orderId}:`, (err as Error).message);
+          return {
+            ...delivery.toObject(),
+            deliveryAddress: null,
+          };
+        }
+      })
+    );
+
+    res.status(200).json(enhancedDeliveries);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching assigned deliveries', error: error.message });
+  }
+
+
+
 };
 
-export const updateStatus = async (req: Request, res: Response) => {
-  const result = await DeliveryService.updateStatus(req.params.id, req.body.status);
-  res.status(200).json(result);
+// ✅ Fetch All My Deliveries (Ongoing + Completed)
+export const getMyDeliveries = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    const driver = await Driver.findOne({ userId });
+
+    if (!driver) {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    const deliveries = await findAllDeliveriesForDriver(driver._id.toString());
+
+    const enhancedDeliveries = await Promise.all(
+      deliveries.map(async (delivery) => {
+        try {
+          const orderRes = await axios.get(`${ORDER_SERVICE_BASE_URL}/${delivery.orderId}`);
+          const order = orderRes.data;
+
+          return {
+            ...delivery.toObject(),
+            deliveryAddress: order.deliveryAddress || null,
+          };
+        } catch (err) {
+          console.error(`Failed fetching order ${delivery.orderId}:`, (err as Error).message);
+          return {
+            ...delivery.toObject(),
+            deliveryAddress: null,
+          };
+        }
+      })
+    );
+
+    res.status(200).json(enhancedDeliveries);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching deliveries', error: error.message });
+  }
 };
 
-export const updateDeliveryLocation = async (req: Request, res: Response) => {
-  const result = await DeliveryService.updateLocation(req.params.id, req.body.location);
-  res.status(200).json(result);
-};
+// ✅ Update Delivery Status
+export const updateDeliveryStatus = async (req: Request, res: Response) => {
+  try {
+    const { deliveryId } = req.params;
+    const { status } = req.body;
 
-export const getDeliveryById = async (req: Request, res: Response) => {
-  const delivery = await DeliveryService.getDeliveryById(req.params.id);
-  res.status(200).json(delivery);
-};
+    const allowedStatuses = ['PickedUp', 'Delivered', 'Cancelled'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
 
-export const getActiveDeliveryForDriver = async (req: Request, res: Response) => {
-  const delivery = await DeliveryService.getDeliveryByDriver(req.params.driverId);
-  res.status(200).json(delivery);
+    const updatedDelivery = await updateDeliveryStatusById(deliveryId, status);
+    if (!updatedDelivery) {
+      return res.status(404).json({ message: 'Delivery not found' });
+    }
+
+    res.status(200).json({ message: 'Delivery status updated successfully', updatedDelivery });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating delivery status', error: error.message });
+  }
 };

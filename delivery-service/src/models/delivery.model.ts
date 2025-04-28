@@ -1,42 +1,26 @@
-
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 export interface DeliveryDocument extends Document {
   orderId: string;
-  deliveryPersonId?: string;
-  status: 'Pending' | 'Accepted' | 'PickedUp' | 'EnRoute' | 'Delivered' | 'Cancelled';
-  location: {
-    lat: number;
-    lng: number;
-  };
-  timestamps: {
-    acceptedAt?: Date;
-    pickedUpAt?: Date;
-    deliveredAt?: Date;
-  };
-  customerEmail?: string;
-  customerPhone?: string;
+  driverId?: string;
+  customerId: string;
+  restaurantLocation: string;
+  deliveryLocation: string;
+  acceptStatus: 'Pending' | 'Accepted' | 'Declined';
+  status: 'Pending' | 'Assigned' | 'PickedUp' | 'Delivered' | 'Cancelled';
 }
 
-const DeliverySchema = new Schema<DeliveryDocument>({
-  orderId: { type: String, required: true },
-  deliveryPersonId: { type: String },
-  status: {
-    type: String,
-    enum: ['Pending', 'Accepted', 'PickedUp', 'EnRoute', 'Delivered', 'Cancelled'],
-    default: 'Pending'
+const deliverySchema = new Schema<DeliveryDocument>(
+  {
+    orderId: { type: String, required: true },
+    driverId: { type: String },
+    customerId: { type: String, required: true },
+    restaurantLocation: { type: String, required: true },
+    deliveryLocation: { type: String, required: true },
+    acceptStatus: { type: String, enum: ['Pending', 'Accepted', 'Declined'], default: 'Pending' },
+    status: { type: String, enum: ['Pending', 'Assigned', 'PickedUp', 'Delivered', 'Cancelled'], default: 'Pending' },
   },
-  location: {
-    lat: { type: Number, default: 0 },
-    lng: { type: Number, default: 0 }
-  },
-  timestamps: {
-    acceptedAt: Date,
-    pickedUpAt: Date,
-    deliveredAt: Date,
-  },
-  customerEmail: { type: String },
-  customerPhone: { type: String }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-export default mongoose.model<DeliveryDocument>('Delivery', DeliverySchema);
+export const Delivery = model<DeliveryDocument>('Delivery', deliverySchema);

@@ -1,42 +1,57 @@
-import Delivery from '../models/delivery.model';
+import { Delivery, DeliveryDocument } from '../models/delivery.model';
 
-export const createDelivery = async (data: any) => {
-  return await Delivery.create(data);
+// ✅ Strict type for allowed statuses
+export type DeliveryStatus = 'Pending' | 'Assigned' | 'PickedUp' | 'Delivered' | 'Cancelled';
+
+// ✅ Create new delivery
+export const createDelivery = async (data: {
+  orderId: string;
+  customerId: string;
+  restaurantLocation: string;
+  deliveryLocation: string;
+  driverId: string;
+}): Promise<DeliveryDocument> => {
+  const delivery = new Delivery({
+    ...data,
+    status: 'Assigned',    // Default when assigned
+    acceptStatus: 'Pending',  // Pending acceptance by driver
+  });
+  return delivery.save();
 };
 
-export const assignDriver = async (deliveryId: string) => {
-  // TODO: Implement nearest driver selection logic
-  const driverId = 'driver1';
-  return await Delivery.findByIdAndUpdate(deliveryId, {
-    deliveryPersonId: driverId,
-    status: 'Pending',
-    'statusTimestamps.acceptedAt': new Date()
-  }, { new: true });
+// ✅ Find delivery by order ID
+export const findDeliveryByOrderId = async (orderId: string): Promise<DeliveryDocument | null> => {
+  return Delivery.findOne({ orderId });
 };
 
-export const acceptDelivery = async (deliveryId: string, driverId: string) => {
-  return await Delivery.findByIdAndUpdate(deliveryId, {
-    deliveryPersonId: driverId,
-    status: 'Accepted',
-    'statusTimestamps.acceptedAt': new Date()
-  }, { new: true });
+// ✅ Handle driver response (accept/decline)
+export const updateDeliveryAcceptance = async (delivery: DeliveryDocument, action: 'accept' | 'decline'): Promise<void> => {
+  if (action === 'accept') {
+    delivery.acceptStatus = 'Accepted';
+  } else {
+    delivery.acceptStatus = 'Declined';
+    delivery.driverId = undefined;
+    delivery.status = 'Pending'; // Reset status if declined
+  }
+  await delivery.save();
 };
 
-export const updateStatus = async (deliveryId: string, status: string) => {
-  const update: any = { status };
-  if (status === 'PickedUp') update['statusTimestamps.pickedUpAt'] = new Date();
-  if (status === 'Delivered') update['statusTimestamps.deliveredAt'] = new Date();
-  return await Delivery.findByIdAndUpdate(deliveryId, update, { new: true });
+// ✅ Find assigned deliveries for a driver (Pending acceptance)
+export const findAssignedDeliveriesForDriver = async (driverId: string): Promise<DeliveryDocument[]> => {
+  return Delivery.find({ driverId, acceptStatus: 'Pending' });
 };
 
-export const updateLocation = async (deliveryId: string, location: { lat: number, lng: number }) => {
-  return await Delivery.findByIdAndUpdate(deliveryId, { location }, { new: true });
+// ✅ Fetch all deliveries for driver (Ongoing + Completed)
+export const findAllDeliveriesForDriver = async (driverId: string): Promise<DeliveryDocument[]> => {
+  return Delivery.find({ driverId });
 };
 
-export const getDeliveryById = async (deliveryId: string) => {
-  return await Delivery.findById(deliveryId);
-};
+// ✅ Update delivery status safely
+export const updateDeliveryStatusById = async (deliveryId: string, status: DeliveryStatus): Promise<DeliveryDocument | null> => {
+  const delivery = await Delivery.findById(deliveryId);
+  if (!delivery) return null;
 
-export const getDeliveryByDriver = async (driverId: string) => {
-  return await Delivery.findOne({ deliveryPersonId: driverId, status: { $ne: 'Delivered' } });
+  delivery.status = status; // Now type-safe ✅
+  await delivery.save();
+  return delivery;
 };

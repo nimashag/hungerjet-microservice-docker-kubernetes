@@ -18,6 +18,7 @@ interface OrderItem {
 
 interface Order {
   _id: string;
+  userId: string;
   customerName: string;
   totalAmount: number;
   status: string;
@@ -73,14 +74,15 @@ const RestaurantOrders = () => {
   const toggleOrderStatus = async (orderId: string, currentStatus: string) => {
     try {
       let newStatus = "";
-
+  
       if (currentStatus === "Pending") newStatus = "Confirmed";
       else if (currentStatus === "Confirmed") newStatus = "Preparing";
       else if (currentStatus === "Preparing") newStatus = "Waiting for Pickup";
-      else return;
-
+      else return; // No further action if already Waiting for Pickup
+  
       const token = localStorage.getItem("token");
-
+  
+      // 1. Update the Order Status first
       await axios.put(
         `${orderUrl}/api/orders/${orderId}`,
         { status: newStatus },
@@ -90,17 +92,42 @@ const RestaurantOrders = () => {
           },
         }
       );
-
+  
+      // 2. Update local UI
       setOrders((prev) =>
         prev.map((order) =>
           order._id === orderId ? { ...order, status: newStatus } : order
         )
       );
+  
+      // 3. IF newStatus === "Waiting for Pickup", THEN call DeliveryService assign
+      if (newStatus === "Waiting for Pickup") {
+        try {
+          // Find the order we just updated (to get customerId, restaurantId)
+          const order = orders.find((o) => o._id === orderId);
+          console.log("Order to assign:", order);
+          if (!order) {
+            console.error("Order not found in local state");
+            return;
+          }
+  
+          // Assuming you have restaurant _id stored in restaurant state
+          const response = await axios.post(`http://localhost:3000/api/delivery/assign`, {
+            orderId: order._id,
+            customerId: order.userId|| "",  
+            restaurantId: restaurant?._id || "",
+          });
+  
+          console.log("Driver assigned successfully:", response.data);
+        } catch (assignError) {
+          console.error("Failed to assign driver:", assignError);
+        }
+      }
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
   };
-
+  
   const generateReport = () => {
     const doc = new jsPDF();
 

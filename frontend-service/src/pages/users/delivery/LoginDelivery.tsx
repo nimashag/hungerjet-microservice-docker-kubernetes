@@ -2,15 +2,15 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import axios from "axios";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import { userUrl } from "../../../api";
 
 const LoginDelivery = () => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const API_BASE =  'http://localhost:3003';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,7 +19,7 @@ const LoginDelivery = () => {
 
   const validateForm = () => {
     let valid = true;
-    let tempErrors: { email?: string; password?: string } = {};
+    const tempErrors: { email?: string; password?: string } = {};
 
     if (!form.email.trim()) {
       tempErrors.email = "Email is required";
@@ -43,23 +43,47 @@ const LoginDelivery = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!validateForm()) return;
-
+  
     try {
-      const res = await axios.post(`${userUrl}/api/auth/login`, form);
-
-      // TODO: Check if user.role === 'deliveryPersonnel'
-      if (res.data.user.role === "deliveryPersonnel") {
-        navigate("/delivery-home");
+      const res = await axios.post(`${API_BASE}/api/auth/login`, form);
+  
+      //  Save token and user after successful login
+      if (res.data.user.role === 'deliveryPersonnel') {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+  
+        const token = res.data.token;
+        try {
+          //  Immediately check if driver profile exists
+          const profileRes = await axios.get('http://localhost:3004/api/drivers/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          console.log("Driver profile found ");
+          navigate('/driver/dashboard'); //  Driver profile exists
+  
+        } catch (profileErr: any) {
+          if (profileErr.response?.status === 404) {
+            console.log("Driver profile missing  Redirecting to register profile...");
+            navigate('/driver/register-profile'); //  Driver profile missing
+          } else {
+            console.error("Error checking driver profile", profileErr);
+            alert('Error verifying driver profile. Please try again.');
+          }
+        }
       } else {
         alert("Access denied: Not a delivery personnel.");
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Login failed");
+      console.error(err);
+      alert(err.response?.data?.message || 'Login failed');
     }
   };
-
+  
   const handleMouseEnter = () => {
     gsap.to(liquidRef.current, {
       x: 0,
@@ -77,14 +101,14 @@ const LoginDelivery = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-green-100 via-white to-blue-200 font-sans">
+      {/* Left Panel - Glass Card */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Delivery Login
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Welcome back, rider! Sign in to start delivering with HungerJet.
           </p>
 
@@ -96,7 +120,7 @@ const LoginDelivery = () => {
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.email ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
@@ -112,7 +136,7 @@ const LoginDelivery = () => {
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.password ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
@@ -125,6 +149,7 @@ const LoginDelivery = () => {
               Forgot Password?
             </div>
 
+            {/* GSAP Liquid Hover Button */}
             <div className="relative w-full mt-2">
               <button
                 type="submit"
@@ -142,24 +167,7 @@ const LoginDelivery = () => {
             </div>
           </form>
 
-          <div className="flex items-center my-6">
-            <hr className="flex-grow border-t" />
-            <span className="mx-4 text-gray-400">or continue with</span>
-            <hr className="flex-grow border-t" />
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              G
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              T
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              f
-            </button>
-          </div>
-
+          {/* Navigation to Delivery Register */}
           <Link to="/register/delivery">
             <p className="text-center text-sm mt-6">
               Not a delivery rider yet?{" "}
@@ -171,10 +179,10 @@ const LoginDelivery = () => {
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Image */}
       <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
         <img
-          src="https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-896c-61f7-bacb-06e38169b042/raw?se=2025-04-20T22%3A35%3A01Z&sp=r&sv=2024-08-04&sr=b&scid=80ff77fd-4543-588b-acdf-a881c1f84761&skoid=dfdaf859-26f6-4fed-affc-1befb5ac1ac2&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-20T17%3A27%3A37Z&ske=2025-04-21T17%3A27%3A37Z&sks=b&skv=2024-08-04&sig=9q2XKnbsN5nkt4nTPU11lXRXVHyMDbYai5j7JWY567A%3D"
+          src="https://images.pexels.com/photos/4393668/pexels-photo-4393668.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
           alt="Delivery Illustration"
           className="rounded-2xl w-full h-full object-cover shadow-md"
         />

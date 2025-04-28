@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaBars, FaTimes, FaSearch, FaUser, FaShoppingCart } from "react-icons/fa";
+import { FaBars, FaTimes } from "react-icons/fa";
+import logoicon1 from "../assets/Logo.png";
+import searchicon from "../assets/search_icon.png";
+import usericon from "../assets/user_icon.png";
+import carticon from "../assets/carticon.png";
 
 const Navbar: React.FC = () => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
-  const [signup, setSignup] = useState<boolean>(false);
-  const [login, setLogin] = useState<boolean>(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isUserDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
 
@@ -15,22 +17,12 @@ const Navbar: React.FC = () => {
     setIsLogged(!!token);
   }, []);
 
-  const toggleSignup = () => {
-    setSignup((prev) => !prev);
-    setUserDropdownOpen(false);
-  };
-
-  const toggleLogin = () => {
-    setLogin((prev) => !prev);
-    setUserDropdownOpen(false);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
   };
 
   const toggleUserDropdown = () => {
     setUserDropdownOpen((prev) => !prev);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen((prev) => !prev);
   };
 
   const logout = () => {
@@ -40,31 +32,35 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 sm:px-10 py-3 bg-white shadow-md font-medium relative z-30">
+    <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] flex items-center justify-between font-medium'>
+    
+      
       {/* Logo */}
-      <motion.div
-        className="text-2xl font-bold text-[#FF5722] cursor-pointer"
+      <motion.img
+        src={logoicon1}
+        className="w-28 cursor-pointer"
+        alt="HungerJet Logo"
         whileHover={{ scale: 1.1 }}
-      >
-        HungerJet
-      </motion.div>
+        transition={{ type: "spring", stiffness: 300 }}
+      />
 
       {/* Desktop Nav Links */}
-      <ul className="hidden sm:flex gap-8 text-sm text-[#4E342E]">
+      <ul className="hidden sm:flex gap-8 md:gap-10 text-sm text-gray-700">
         {[
           { to: "/", text: "Home" },
           { to: "/restaurants", text: "Restaurants" },
           { to: "/about", text: "About Us" },
           { to: "/contactus", text: "Contact Us" },
+          { to: "/reviews", text: "Reviews" },
           { to: "/faqs", text: "FAQs" },
         ].map((item, index) => (
-          <motion.li key={index} whileHover={{ scale: 1.1, y: -2 }}>
+          <motion.li key={index} whileHover={{ scale: 1.1, y: -5 }}>
             <NavLink
               to={item.to}
               className={({ isActive }) =>
-                `hover:text-[#FF5722] transition-colors duration-200 ${
-                  isActive ? "text-[#FF5722] font-semibold" : ""
-                }`
+                `flex flex-col items-center gap-1 ${
+                  isActive ? "text-orange-600" : "text-gray-600"
+                } hover:text-orange-500`
               }
             >
               {item.text}
@@ -73,103 +69,98 @@ const Navbar: React.FC = () => {
         ))}
       </ul>
 
-      {/* Icons */}
-      <div className="flex items-center gap-4">
-        <motion.button whileHover={{ scale: 1.2 }} className="text-[#4E342E] hover:text-[#FF7043]">
-          <FaSearch size={18} />
-        </motion.button>
+      {/* Right Icons */}
+      <div className="flex items-center gap-6">
 
+        <motion.img
+          src={searchicon}
+          className="w-5 cursor-pointer"
+          alt="Search Icon"
+          whileHover={{ scale: 1.2 }}
+        />
+
+        {/* User Icon */}
         <div className="relative">
-          <motion.button
+          <motion.img
+            src={usericon}
+            className="w-5 cursor-pointer"
+            alt="User Icon"
             whileHover={{ scale: 1.2 }}
-            className="text-[#4E342E] hover:text-[#FF7043]"
             onClick={toggleUserDropdown}
-          >
-            <FaUser size={18} />
-          </motion.button>
+          />
           {isUserDropdownOpen && (
             <motion.div
-              className="absolute right-0 mt-3 w-44 bg-white shadow-lg rounded-md py-2 px-4 z-40"
+              className="absolute right-0 mt-2 bg-gray-100 rounded-md shadow-md py-3 px-4 w-40"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
               {!isLogged ? (
                 <div className="flex flex-col gap-2">
-                  <p className="cursor-pointer hover:text-[#FF5722]" onClick={toggleSignup}>
-                    Signup
-                  </p>
-                  <p className="cursor-pointer hover:text-[#FF5722]" onClick={toggleLogin}>
-                    Login
-                  </p>
+                  <Link to="/register/customer" className="hover:text-black">Signup</Link>
+                  <Link to="/login/customer" className="hover:text-black">Login</Link>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <Link to="/profile" className="hover:text-[#FF5722]">
-                    My Profile
-                  </Link>
-                  <Link to="/my-orders" className="hover:text-[#FF5722]">
-                    My Orders
-                  </Link>
-                  <p className="cursor-pointer hover:text-[#FF5722]" onClick={logout}>
-                    Logout
-                  </p>
+                  <Link to="/profile" className="hover:text-black">My Profile</Link>
+                  <Link to="/my-orders" className="hover:text-black">My Orders</Link>
+                  <p className="cursor-pointer hover:text-black" onClick={logout}>Logout</p>
                 </div>
               )}
             </motion.div>
           )}
         </div>
 
+        {/* Cart Icon */}
         <Link to="/cart">
-          <motion.button whileHover={{ scale: 1.2 }} className="text-[#4E342E] hover:text-[#FF7043]">
-            <FaShoppingCart size={20} />
-          </motion.button>
+          <motion.img
+            src={carticon}
+            className="w-6 cursor-pointer"
+            alt="Cart Icon"
+            whileHover={{ scale: 1.2 }}
+          />
         </Link>
 
         {/* Hamburger Icon */}
         <motion.button
           onClick={toggleMobileMenu}
           whileHover={{ scale: 1.2 }}
-          className="sm:hidden text-[#4E342E] hover:text-[#FF7043]"
+          className="sm:hidden text-gray-700"
         >
-          {isMobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+          {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
         </motion.button>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <motion.div
-          className="absolute top-16 left-0 w-full bg-white shadow-md py-5 z-20 sm:hidden"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -20, opacity: 0 }}
-        >
-          <ul className="flex flex-col items-center gap-4 text-[#4E342E]">
+        <div className="absolute top-16 left-0 w-full bg-white shadow-lg sm:hidden py-6 z-40">
+          <ul className="flex flex-col items-center gap-6 text-gray-700">
             {[
               { to: "/", text: "Home" },
-              { to: "/newarrivals", text: "New Arrivals" },
-              { to: "/products", text: "Menu" },
-              { to: "/reviews", text: "Reviews" },
+              { to: "/restaurants", text: "Restaurants" },
               { to: "/about", text: "About Us" },
               { to: "/contactus", text: "Contact Us" },
+              { to: "/reviews", text: "Reviews" },
               { to: "/faqs", text: "FAQs" },
             ].map((item, index) => (
-              <li key={index} onClick={() => setMobileMenuOpen(false)}>
+              <li key={index}>
                 <NavLink
                   to={item.to}
                   className={({ isActive }) =>
-                    `hover:text-[#FF5722] ${
-                      isActive ? "text-[#FF5722] font-semibold" : ""
+                    `hover:text-orange-500 ${
+                      isActive ? "text-orange-600 font-semibold" : ""
                     }`
                   }
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.text}
                 </NavLink>
               </li>
             ))}
           </ul>
-        </motion.div>
+        </div>
       )}
+
     </div>
   );
 };

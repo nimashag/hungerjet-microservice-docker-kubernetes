@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import { userUrl } from "../../../api";
 
 const RegisterCustomer = () => {
   const [form, setForm] = useState({
@@ -11,13 +12,13 @@ const RegisterCustomer = () => {
     phone: "",
     address: "",
   });
-
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Clear error on type
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -32,7 +33,7 @@ const RegisterCustomer = () => {
       tempErrors.email = "Email is required";
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = "Invalid email";
+      tempErrors.email = "Invalid email address";
       isValid = false;
     }
     if (!form.password.trim()) {
@@ -57,7 +58,6 @@ const RegisterCustomer = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     try {
@@ -66,6 +66,7 @@ const RegisterCustomer = () => {
         role: "customer",
       });
       alert(res.data.message || "Registered successfully!");
+      navigate("/login/customer");
     } catch (err: any) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -88,23 +89,14 @@ const RegisterCustomer = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel - Image */}
-      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
-        <img
-          src="https://i.pinimg.com/736x/ea/44/a8/ea44a880f9f20db0ba98bfa84cb03e76.jpg"
-          alt="Register Illustration"
-          className="rounded-2xl w-full h-full object-cover shadow-md"
-        />
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-green-100 via-white to-blue-200 font-sans">
+      {/* Left Panel - Glass Card */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Create Your Account
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Join HungerJet and experience hassle-free food delivery.
           </p>
 
@@ -117,7 +109,7 @@ const RegisterCustomer = () => {
                   placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                   value={(form as any)[field]}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                     errors[field] ? "border-red-500" : "focus:ring-green-500"
                   }`}
                 />
@@ -145,16 +137,24 @@ const RegisterCustomer = () => {
             </div>
           </form>
 
-          <p className="text-center text-sm mt-6">
-            Already have an account?{" "}
-            <a
-              href="/login/customer"
-              className="text-green-600 hover:underline"
-            >
-              Login here
-            </a>
-          </p>
+          <Link to="/login/customer">
+            <p className="text-center text-sm mt-6">
+              Already have an account?{" "}
+              <span className="text-green-600 hover:underline cursor-pointer">
+                Login here
+              </span>
+            </p>
+          </Link>
         </div>
+      </div>
+
+      {/* Right Panel - Image */}
+      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
+        <img
+          src="https://i.pinimg.com/736x/ea/44/a8/ea44a880f9f20db0ba98bfa84cb03e76.jpg"
+          alt="Register Illustration"
+          className="rounded-2xl w-full h-full object-cover shadow-md"
+        />
       </div>
     </div>
   );

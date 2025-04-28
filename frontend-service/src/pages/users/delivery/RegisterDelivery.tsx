@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import gsap from "gsap";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import { userUrl } from "../../../api";
 
 const RegisterDelivery = () => {
   const [form, setForm] = useState({
@@ -16,6 +17,7 @@ const RegisterDelivery = () => {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -49,7 +51,7 @@ const RegisterDelivery = () => {
     }
 
     if (!/\S+@\S+\.\S+/.test(form.email)) {
-      tempErrors.email = "Invalid email";
+      tempErrors.email = "Invalid email address";
       isValid = false;
     }
 
@@ -68,7 +70,7 @@ const RegisterDelivery = () => {
       });
 
       alert(res.data.message || "Registered successfully!");
-      // Add Home HerRe ?//////////////////////////////////
+      navigate("/login/delivery"); // Redirect to login after successful register
     } catch (err: any) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -91,23 +93,14 @@ const RegisterDelivery = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
-      {/* Left Panel - Image */}
-      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
-        <img
-          src="https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-896c-61f7-bacb-06e38169b042/raw?se=2025-04-20T22%3A35%3A01Z&sp=r&sv=2024-08-04&sr=b&scid=80ff77fd-4543-588b-acdf-a881c1f84761&skoid=dfdaf859-26f6-4fed-affc-1befb5ac1ac2&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-20T17%3A27%3A37Z&ske=2025-04-21T17%3A27%3A37Z&sks=b&skv=2024-08-04&sig=9q2XKnbsN5nkt4nTPU11lXRXVHyMDbYai5j7JWY567A%3D"
-          alt="Register Delivery"
-          className="rounded-2xl w-full h-full object-cover shadow-md"
-        />
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+    <div className="flex h-screen w-full bg-gradient-to-r from-green-100 via-white to-blue-200 font-sans">
+      {/* Left Panel - Glassmorphism */}
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Delivery Registration
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
+          <p className="text-gray-600 mb-6 text-center">
             Join HungerJet's delivery team and start earning!
           </p>
 
@@ -116,9 +109,9 @@ const RegisterDelivery = () => {
               { name: "name", placeholder: "Full Name" },
               { name: "email", placeholder: "Email" },
               { name: "password", placeholder: "Password", type: "password" },
-              { name: "phone", placeholder: "Phone" },
+              { name: "phone", placeholder: "Phone Number" },
               { name: "address", placeholder: "Address" },
-              { name: "vehicleType", placeholder: "Vehicle Type (e.g. Bike)" },
+              { name: "vehicleType", placeholder: "Vehicle Type (e.g., Bike)" },
               { name: "licenseNumber", placeholder: "License Number" },
             ].map((field) => (
               <div key={field.name}>
@@ -128,16 +121,14 @@ const RegisterDelivery = () => {
                   placeholder={field.placeholder}
                   value={form[field.name as keyof typeof form]}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-3 bg-white/70 border rounded-full focus:outline-none focus:ring-2 ${
                     errors[field.name]
                       ? "border-red-500"
                       : "focus:ring-green-500"
                   }`}
                 />
                 {errors[field.name] && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors[field.name]}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
                 )}
               </div>
             ))}
@@ -162,14 +153,20 @@ const RegisterDelivery = () => {
 
           <p className="text-center text-sm mt-6">
             Already registered?{" "}
-            <a
-              href="/login/delivery"
-              className="text-green-600 hover:underline"
-            >
+            <Link to="/login/delivery" className="text-green-600 hover:underline">
               Login here
-            </a>
+            </Link>
           </p>
         </div>
+      </div>
+
+      {/* Right Panel - Image */}
+      <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
+        <img
+          src="https://images.pexels.com/photos/4393668/pexels-photo-4393668.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          alt="Delivery Registration"
+          className="rounded-2xl w-full h-full object-cover shadow-md"
+        />
       </div>
     </div>
   );

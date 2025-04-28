@@ -2,13 +2,11 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import axios from "axios";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import { userUrl } from "../../../api";
 
 const LoginCustomer = () => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -19,7 +17,7 @@ const LoginCustomer = () => {
 
   const validateForm = () => {
     let valid = true;
-    let tempErrors: { email?: string; password?: string } = {};
+    const tempErrors: { email?: string; password?: string } = {};
 
     if (!form.email.trim()) {
       tempErrors.email = "Email is required";
@@ -43,24 +41,21 @@ const LoginCustomer = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     try {
       const res = await axios.post(`${userUrl}/api/auth/login`, form);
-      console.log(`Login response: ${JSON.stringify(res)}`);
-
       const { token, user } = res.data;
 
       if (user.role === "customer") {
-        localStorage.setItem("token", token); // Save token to localStorage
-      navigate('/customer-home');
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        navigate('/customer-home');
       } else {
-        alert("Access denied: Not a restaurant admin");
+        alert("Access denied: Not a customer account");
       }
     } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Invalid credentials or server error";
+      const message = err.response?.data?.message || "Invalid credentials or server error";
       alert(message);
     }
   };
@@ -82,16 +77,15 @@ const LoginCustomer = () => {
   };
 
   return (
-    <div className="flex h-screen w-full font-sans">
+    <div className="flex h-screen w-full bg-gradient-to-r from-green-100 via-white to-blue-200 font-sans">
       {/* Left Panel */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
-        <div className="max-w-md w-full">
+      <div className="w-full md:w-1/2 flex justify-center items-center px-6">
+        <div className="w-full max-w-md bg-white/30 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/40">
           <h2 className="text-4xl font-bold mb-2 font-playfair text-gray-900 text-center">
             Welcome Back!
           </h2>
-          <p className="text-gray-500 mb-6 text-center">
-            Simplify your workflow and boost your productivity with HungerJet.
-            Get started for free.
+          <p className="text-gray-600 mb-6 text-center">
+            Login to HungerJet and explore delicious possibilities.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -102,7 +96,7 @@ const LoginCustomer = () => {
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.email ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
@@ -118,7 +112,7 @@ const LoginCustomer = () => {
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 bg-white/70 rounded-full border focus:outline-none focus:ring-2 ${
                   errors.password ? "border-red-500" : "focus:ring-green-500"
                 }`}
               />
@@ -149,24 +143,7 @@ const LoginCustomer = () => {
             </div>
           </form>
 
-          <div className="flex items-center my-6">
-            <hr className="flex-grow border-t" />
-            <span className="mx-4 text-gray-400">or continue with</span>
-            <hr className="flex-grow border-t" />
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              G
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              T
-            </button>
-            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-              f
-            </button>
-          </div>
-
+          {/* Navigation to Register */}
           <Link to="/register/customer">
             <p className="text-center text-sm mt-6">
               Not a member?{" "}
@@ -178,7 +155,7 @@ const LoginCustomer = () => {
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Image */}
       <div className="hidden md:flex w-1/2 justify-center items-center px-10 py-10">
         <img
           src="https://i.pinimg.com/736x/ea/44/a8/ea44a880f9f20db0ba98bfa84cb03e76.jpg"

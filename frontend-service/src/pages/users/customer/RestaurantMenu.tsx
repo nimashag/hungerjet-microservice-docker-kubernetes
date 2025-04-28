@@ -20,7 +20,6 @@ type Restaurant = {
   available: boolean;
 };
 
-
 const RestaurantMenu: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -30,34 +29,36 @@ const RestaurantMenu: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const token = localStorage.getItem("token");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { addToCart } = useCart();
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+
+  // randomly assign best sellers
+  const [bestSellers, setBestSellers] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
-        const response = await axios.get(
-          `${restaurantUrl}/api/restaurants/${restaurantId}`
-        );
+        const response = await axios.get(`${restaurantUrl}/api/restaurants/${restaurantId}`);
         setRestaurant(response.data);
       } catch (error) {
-        console.error("Error fetching restaurant data:", error);
+        console.error("Error fetching restaurant:", error);
       }
     };
 
     const fetchMenuItems = async () => {
       try {
-        const response = await axios.get(
-          `${restaurantUrl}/api/restaurants/${restaurantId}/menu-items`
-        );
+        const response = await axios.get(`${restaurantUrl}/api/restaurants/${restaurantId}/menu-items`);
         const items: MenuItem[] = response.data;
         setMenuItems(items);
         setFilteredItems(items);
 
-        const uniqueCategories = Array.from(
-          new Set(items.map((item) => item.category))
-        );
+        const uniqueCategories = Array.from(new Set(items.map((item) => item.category)));
         setCategories(uniqueCategories);
+
+        const randomBests = items.sort(() => 0.5 - Math.random()).slice(0, Math.min(3, items.length)).map((i) => i._id);
+        setBestSellers(randomBests);
+
       } catch (error) {
         console.error("Error fetching menu items:", error);
       } finally {
@@ -65,15 +66,15 @@ const RestaurantMenu: React.FC = () => {
       }
     };
 
-    if (restaurantId){
-      fetchRestaurant();  // Fetch restaurant availability
-      fetchMenuItems();   // Fetch menu items
+    if (restaurantId) {
+      fetchRestaurant();
+      fetchMenuItems();
     }
   }, [restaurantId]);
 
   useEffect(() => {
     filterMenuItems();
-  }, [searchTerm, selectedCategories, menuItems]);
+  }, [searchTerm, selectedCategories, menuItems, sortOrder]);
 
   const filterMenuItems = () => {
     let filtered = [...menuItems];
@@ -92,6 +93,12 @@ const RestaurantMenu: React.FC = () => {
       );
     }
 
+    if (sortOrder === "asc") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else {
+      filtered.sort((a, b) => b.price - a.price);
+    }
+
     setFilteredItems(filtered);
   };
 
@@ -104,112 +111,141 @@ const RestaurantMenu: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
+    const quantity = quantities[item._id] || 1;
     const cartItem = {
       menuItemId: item._id,
       name: item.name,
       price: item.price,
-      quantity: 1,
+      quantity: quantity,
     };
-  
     addToCart(cartItem);
-  
-    console.log("Added to cart:", cartItem); // 👈 Logs the cart item details
-    alert(`🛒 ${item.name} added to cart!`);
+    alert(`🛒 ${item.name} (x${quantity}) added to cart!`);
+  };
+
+  const handleQuantityChange = (itemId: string, amount: number) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [itemId]: Math.max(1, (prev[itemId] || 1) + amount),
+    }));
   };
 
   return (
     <>
       <Navbar />
-      <div className="bg-white min-h-screen py-10">
+      <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-10">
-            🍽️ Our Menu
-          </h1>
 
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-extrabold text-gray-800">🍽️ Our Menu</h1>
+            <p className="text-gray-500 mt-3">Taste the best dishes crafted with love!</p>
+            {restaurant?.available === false && (
+              <p className="mt-3 text-sm bg-red-100 text-red-600 inline-block px-4 py-1 rounded-full font-medium animate-pulse">
+                ⚠️ Restaurant Currently Closed
+              </p>
+            )}
+          </div>
+
+          {/* Filters */}
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Sidebar */}
             <div className="lg:w-1/4 w-full">
-              <div className="border border-gray-200 rounded-xl p-5 shadow-sm bg-gray-50">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Filters
-                </h2>
+              <div className="border border-gray-200 rounded-2xl p-6 shadow-sm bg-white">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Filter & Sort</h2>
+
                 <input
                   type="text"
-                  placeholder="Search menu..."
+                  placeholder="🔍 Search menu..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full mb-6 px-4 py-2 rounded-full border border-gray-300 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-sm"
                 />
-                <div className="space-y-2">
+
+                <div className="flex flex-col gap-4 mb-6">
                   {categories.map((category) => (
-                    <label
-                      key={category}
-                      className="flex items-center space-x-2 text-sm text-gray-700"
-                    >
+                    <label key={category} className="flex items-center space-x-3 text-sm font-medium text-gray-700">
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(category)}
                         onChange={() => toggleCategory(category)}
-                        className="form-checkbox text-blue-600"
+                        className="accent-amber-500"
                       />
                       <span>{category}</span>
                     </label>
                   ))}
                 </div>
+
+                <select
+                  className="w-full rounded-full border border-gray-300 p-2 text-sm focus:ring-amber-500 focus:border-amber-500"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+                >
+                  <option value="asc">Price: Low to High</option>
+                  <option value="desc">Price: High to Low</option>
+                </select>
               </div>
             </div>
 
-            {/* Menu List */}
+            {/* Menu Grid */}
             <div className="lg:w-3/4 w-full">
               {loading ? (
-                <p className="text-center text-gray-500 text-lg">
-                  Loading menu...
-                </p>
+                <p className="text-center text-gray-500 text-lg">Loading menu...</p>
               ) : filteredItems.length === 0 ? (
-                <p className="text-center text-gray-500 text-lg">
-                  No items found.
-                </p>
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                  <img src="https://cdni.iconscout.com/illustration/premium/thumb/no-data-available-5301483-4442623.png" alt="No Data" className="h-48 mb-4" />
+                  <p>No menu items match your search ☹️</p>
+                </div>
               ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 font-[Inter] text-[#2E2E2E]">
+                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredItems.map((item) => (
                     <div
                       key={item._id}
-                      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
+                      className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col relative"
                     >
+                      {bestSellers.includes(item._id) && (
+                        <div className="absolute top-2 right-2 bg-yellow-400 text-white text-xs px-3 py-1 rounded-full font-bold animate-pulse">
+                          🔥 Best Seller
+                        </div>
+                      )}
+
                       <img
                         src={`${restaurantUrl}/uploads/${item.image}`}
                         alt={item.name}
-                        className="w-full h-52 object-cover rounded-t-2xl"
+                        className="w-full h-48 object-cover"
                       />
-                      <div className="p-5 flex flex-col justify-between space-y-4">
-                        <div>
-                          <h2 className="text-xl text-center font-semibold text-[#222] mb-1">
-                            {item.name}
-                          </h2>
-                          <hr className="border-t border-gray-200 mb-3" />
-                          <p className="text-sm text-gray-600 leading-relaxed">
-                            {item.description}
-                          </p>
+
+                      <div className="p-6 flex flex-col flex-grow">
+                        <h2 className="text-xl font-bold text-gray-800 mb-2">{item.name}</h2>
+                        <p className="text-gray-500 text-sm mb-4 flex-grow">{item.description}</p>
+
+                        <div className="flex justify-between items-center mt-auto mb-4">
+                          <span className="text-xs text-gray-400">{item.category}</span>
+                          <span className="text-lg font-bold text-amber-700">${item.price.toFixed(2)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center pt-2">
-                          <span className="text-sm text-gray-400 italic">
-                            {item.category}
-                          </span>
-                          <span className="text-base font-bold text-amber-800">
-                            ${item.price.toFixed(2)}
-                          </span>
-                        </div>
+                        <div className="flex justify-between items-center">
+                          {/* Quantity controls */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleQuantityChange(item._id, -1)}
+                              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            >-</button>
+                            <span className="w-6 text-center">{quantities[item._id] || 1}</span>
+                            <button
+                              onClick={() => handleQuantityChange(item._id, 1)}
+                              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            >+</button>
+                          </div>
 
-                        <div className="pt-3 flex justify-end">
+                          {/* Add to cart button */}
                           <button
                             onClick={() => handleAddToCart(item)}
-                            disabled={restaurant?.available === false} 
-                            className={`relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 ${restaurant?.available === false ? "opacity-50 cursor-not-allowed" : ""}`}
+                            disabled={restaurant?.available === false}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-medium ${
+                              restaurant?.available === false ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                           >
-                            <span className="relative px-6 py-1 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent flex items-center gap-2">
-                              <FaShoppingCart /> Add to Cart
-                            </span>
+                            <FaShoppingCart /> Add
                           </button>
                         </div>
                       </div>
@@ -219,6 +255,7 @@ const RestaurantMenu: React.FC = () => {
               )}
             </div>
           </div>
+
         </div>
       </div>
       <Footer />

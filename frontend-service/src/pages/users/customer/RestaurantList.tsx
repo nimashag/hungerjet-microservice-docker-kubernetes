@@ -3,6 +3,7 @@ import axios from "axios";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
 import { FaSearch } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 type Restaurant = {
@@ -15,9 +16,7 @@ type Restaurant = {
 
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
-    []
-  );
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -25,7 +24,14 @@ const RestaurantList: React.FC = () => {
     const fetchRestaurants = async () => {
       try {
         const response = await axios.get(`${restaurantUrl}/api/restaurants`);
-        setRestaurants(response.data);
+        const fetched = response.data;
+
+        // Sort immediately when fetching: OPEN first, CLOSED after
+        const sorted = fetched.sort((a: Restaurant, b: Restaurant) => {
+          return (b.available ? 1 : 0) - (a.available ? 1 : 0);
+        });
+
+        setRestaurants(sorted);
       } catch (error) {
         console.error("Error fetching restaurants:", error);
       } finally {
@@ -37,15 +43,19 @@ const RestaurantList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredRestaurants(restaurants);
-    } else {
-      setFilteredRestaurants(
-        restaurants.filter((restaurant) =>
-          restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+    let filtered = restaurants;
+    if (searchQuery !== "") {
+      filtered = restaurants.filter((restaurant) =>
+        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+
+    // Sort again after search to keep OPEN first
+    const sorted = filtered.sort((a, b) => {
+      return (b.available ? 1 : 0) - (a.available ? 1 : 0);
+    });
+
+    setFilteredRestaurants(sorted);
   }, [searchQuery, restaurants]);
 
   if (loading) {
@@ -59,78 +69,88 @@ const RestaurantList: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-10">
-            🍴 Discover Our Restaurants
-          </h1>
+      <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Title */}
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
+              Featured Restaurants 🍽️
+            </h1>
+            <p className="text-gray-500 text-sm">Savor the best flavors around you.</p>
+          </div>
 
           {/* Search Bar */}
-          <div className="mb-8 flex justify-end">
-            <div className="relative w-full max-w-xs">
+          <div className="flex justify-center mb-10">
+            <div className="relative w-full max-w-md">
               <input
                 type="text"
-                placeholder="Search restaurants"
+                placeholder="Search your favorite restaurant..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-5 py-3 pl-12 rounded-full border border-gray-300 bg-white/60 backdrop-blur-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
-              <FaSearch
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
+              <FaSearch className="absolute left-4 top-3.5 text-gray-400" size={18} />
             </div>
           </div>
 
+          {/* Restaurant Cards */}
           {filteredRestaurants.length === 0 ? (
             <p className="text-center text-gray-500">No restaurants found.</p>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 font-sans">
+            <motion.div 
+              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
               {filteredRestaurants.map((restaurant) => (
-                <div
+                <motion.div
                   key={restaurant._id}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                  whileHover={{ scale: 1.03 }}
+                  className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col"
                 >
                   <img
                     src={`${restaurantUrl}/uploads/${restaurant.image}`}
                     alt={restaurant.name}
                     className="w-full h-48 object-cover"
                   />
-                  <div className="p-5 text-gray-700 flex flex-col space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-gray-800 tracking-tight">
+
+                  <div className="p-6 flex flex-col flex-grow">
+                    {/* Name and Status */}
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-xl font-semibold text-gray-800">
                         {restaurant.name}
                       </h2>
                       <span
-                        className={`text-sm font-medium px-3 py-1 rounded-full ${
+                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
                           restaurant.available
-                            ? "bg-green-100 text-green-600  animate-bounce"
+                            ? "bg-green-100 text-green-600 animate-pulse"
                             : "bg-red-100 text-red-500 animate-pulse"
                         }`}
                       >
-                        {restaurant.available ? "Open" : "Closed"}
+                        {restaurant.available ? "OPEN" : "CLOSED"}
                       </span>
                     </div>
 
-                    <p className="text-sm text-gray-500">
-                      {restaurant.address || "Address not available."}
+                    {/* Address */}
+                    <p className="text-gray-500 text-sm flex-grow">
+                      {restaurant.address || "Address not available"}
                     </p>
 
-                    <div className="flex justify-end pt-1">
+                    {/* View Menu Button */}
+                    <div className="pt-5 flex justify-end">
                       <a
                         href={`/restaurants/${restaurant._id}`}
-                        onClick={() => {
-                          localStorage.setItem('selectedRestaurantId', restaurant._id);
-                        }}
-                        className="text-sm font-medium text-amber-900 hover:text-amber-700 transition-colors duration-200"
+                        onClick={() => localStorage.setItem('selectedRestaurantId', restaurant._id)}
+                        className="inline-block text-white bg-amber-500 hover:bg-amber-600 px-5 py-2 rounded-full text-sm font-semibold transition-all"
                       >
                         View Menu →
                       </a>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

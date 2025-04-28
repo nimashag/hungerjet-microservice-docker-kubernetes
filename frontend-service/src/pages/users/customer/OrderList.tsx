@@ -133,7 +133,7 @@ const OrderList: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="max-w-6xl mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-8 min-h-screen">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-800">Orders</h1>
           <p className="text-gray-500 text-sm">Manage and track your recent orders</p>

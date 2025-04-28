@@ -1,12 +1,11 @@
-import React, { useEffect, useState, Fragment } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import AdminLayout from "./RestaurantAdminLayout";
-import { LuPencil, LuTrash2 } from "react-icons/lu";
-import { Dialog, Transition } from "@headlessui/react";
-import { Plus } from "lucide-react";
+import { LuTrash2, LuPencil } from "react-icons/lu";
+import { Utensils, ClipboardList, CheckCircle, Clock } from "lucide-react";
 import Swal from "sweetalert2";
-import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import { restaurantUrl, orderUrl } from "../../../api";
 
 interface Restaurant {
   _id: string;
@@ -17,154 +16,51 @@ interface Restaurant {
   available: boolean;
 }
 
-export const AdminDashboard: React.FC = () => {
+interface MenuItem {
+  _id: string;
+  name: string;
+  createdAt: string;
+  price: number;    // ✅ added price field
+  ordersCount?: number;
+}
+
+interface Order {
+  _id: string;
+  status: "Confirmed" | "Pending" | "Waiting for Pickup" | string;
+  menuItemId: string;
+}
+
+const AdminDashboard: React.FC = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    address: "",
-    location: "",
-    image: null as File | null,
-  });
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    address: "",
-    location: "",
-    available: false,
-    image: null as File | null,
-  });
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const restaurantRes = await axios.get(`${restaurantUrl}/api/restaurants/my`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setRestaurant(res.data[0]);
+        const restaurantData = restaurantRes.data[0];
+        setRestaurant(restaurantData);
+
+        const menuRes = await axios.get(`${restaurantUrl}/api/restaurants/my/menu-items`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setMenuItems(menuRes.data);
+
+        const ordersRes = await axios.get(`${orderUrl}/api/orders/restaurant/${restaurantData._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOrders(ordersRes.data);
       } catch (err) {
-        console.error("No restaurant found or error:", err);
+        console.error("Fetch error:", err);
       }
     };
-
-    fetchRestaurant();
+    fetchData();
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login/restaurant");
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files) {
-      setForm((prev) => ({ ...prev, image: files[0] }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleCreateRestaurant = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!form.name.trim()) {
-      Swal.fire("Validation Error", "Restaurant name is required.", "warning");
-      return;
-    }
-
-    if (!form.address.trim()) {
-      Swal.fire("Validation Error", "Address is required.", "warning");
-      return;
-    }
-
-    if (!form.location.trim()) {
-      Swal.fire("Validation Error", "Location is required.", "warning");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("address", form.address);
-    formData.append("location", form.location);
-    if (form.image) formData.append("image", form.image);
-
-    try {
-      const res = await axios.post(`${restaurantUrl}/api/restaurants`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setRestaurant(res.data);
-      setIsCreateOpen(false);
-      Swal.fire("Success!", "Restaurant created successfully!", "success");
-    } catch (err) {
-      console.error("Creation failed:", err);
-      Swal.fire("Error", "Failed to create restaurant.", "error");
-    }
-  };
-
-  const openEditModal = () => {
-    if (!restaurant) return;
-    setEditForm({
-      name: restaurant.name,
-      address: restaurant.address,
-      location: restaurant.location,
-      image: null,
-      available: restaurant.available,
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!restaurant) return;
-
-    if (!editForm.name.trim()) {
-      Swal.fire("Validation Error", "Restaurant name is required.", "warning");
-      return;
-    }
-
-    if (!editForm.address.trim()) {
-      Swal.fire("Validation Error", "Address is required.", "warning");
-      return;
-    }
-
-    if (!editForm.location.trim()) {
-      Swal.fire("Validation Error", "Location is required.", "warning");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("name", editForm.name);
-    formData.append("address", editForm.address);
-    formData.append("location", editForm.location);
-    formData.append("available", String(editForm.available));
-    if (editForm.image) {
-      formData.append("image", editForm.image);
-    }
-
-    try {
-      const res = await axios.put(
-        `${restaurantUrl}/api/restaurants/${restaurant._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setRestaurant(res.data);
-      setIsEditOpen(false);
-    } catch (err) {
-      console.error("Update failed:", err);
-    }
-  };
 
   const handleDeleteRestaurant = async () => {
     if (!restaurant) return;
@@ -182,9 +78,7 @@ export const AdminDashboard: React.FC = () => {
     if (confirm.isConfirmed) {
       try {
         await axios.delete(`${restaurantUrl}/api/restaurants/${restaurant._id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setRestaurant(null);
@@ -196,358 +90,162 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const confirmedOrders = orders.filter((order) => order.status === "Confirmed").length;
+  const pendingOrders = orders.filter((order) => order.status === "Pending").length;
+  const waitingForPickup = orders.filter((order) => order.status === "Waiting for Pickup").length;
+
+  const menuItemOrdersCount = menuItems.map((item) => {
+    const count = orders.filter((order) => order.menuItemId === item._id).length;
+    return { ...item, ordersCount: count };
+  });
+
+  const topOrderedItems = [...menuItemOrdersCount]
+    .sort((a, b) => (b.ordersCount || 0) - (a.ordersCount || 0))
+    .slice(0, 5);
+
+  const topRecentItems = [...menuItems]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
+  const toggleStoreStatus = async (newStatus: boolean) => {
+    if (!restaurant) return;
+    try {
+      await axios.put(
+        `${restaurantUrl}/api/restaurants/${restaurant._id}`,
+        { available: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRestaurant((prev) => prev ? { ...prev, available: newStatus } : prev);
+      Swal.fire("Success!", `Store is now ${newStatus ? "Open" : "Closed"}.`, "success");
+    } catch (err) {
+      console.error("Toggle status failed:", err);
+      Swal.fire("Error", "Failed to update store status.", "error");
+    }
+  };
+
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient from-gray-50 to-gray-200 p-4">
-        <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6 md:p-10 space-y-6">
-          <div className="flex items-center justify-between flex-wrap">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">
-              🍽️ Restaurant Details
-            </h1>
-            <div className="flex gap-4 mt-4 md:mt-0">
+      <div className="p-6 font-['Inter'] text-gray-800 dark:text-gray-100 w-full">
+        
+        {/* Analytics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-10">
+          {[{
+            icon: <Utensils className="text-indigo-500" />,
+            label: "Total Menu Items",
+            value: menuItems.length
+          }, {
+            icon: <ClipboardList className="text-blue-500" />,
+            label: "Total Orders",
+            value: orders.length
+          }, {
+            icon: <CheckCircle className="text-green-500" />,
+            label: "Confirmed Orders",
+            value: confirmedOrders
+          }, {
+            icon: <Clock className="text-yellow-500" />,
+            label: "Pending Orders",
+            value: pendingOrders
+          }, {
+            icon: <Clock className="text-orange-500" />,
+            label: "Waiting for Pickup",
+            value: waitingForPickup
+          }].map((item, idx) => (
+            <div key={idx} className="p-6 bg-white dark:bg-neutral-800 rounded-xl shadow flex items-center gap-4 hover:scale-105 transition-all duration-300">
+              {item.icon}
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{item.label}</p>
+                <h3 className="text-xl font-bold">{item.value}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Restaurant Info */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-8 flex flex-col md:flex-row gap-8 mb-10">
+          {restaurant && restaurant.image && (
+            <img
+              src={`${restaurantUrl}/uploads/${restaurant.image}`}
+              alt="Restaurant"
+              className="rounded-xl w-full md:w-1/2 object-cover h-72 shadow-md"
+            />
+          )}
+          <div className="flex flex-col justify-between flex-1">
+            <div>
+              <h2 className="text-3xl font-bold mb-4">{restaurant?.name}</h2>
+              <p className="text-lg font-semibold mb-2">{restaurant?.address}</p>
+              <p className="text-lg font-semibold mb-4">{restaurant?.location}</p>
+
+              {/* Store Status + Toggle */}
+              <div className="flex items-center gap-4 mt-4">
+                <span className={`inline-block font-semibold px-4 py-2 rounded-full text-lg shadow-sm ${
+                  restaurant?.available
+                    ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400"
+                    : "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400"
+                }`}>
+                  {restaurant?.available ? "✅ Store Open" : "❌ Store Closed"}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={restaurant?.available}
+                    onChange={(e) => toggleStoreStatus(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 relative transition-all duration-300">
+                    <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-6">
               <button
-                onClick={openEditModal}
-                className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-2 rounded-full shadow-sm transition flex items-center justify-center text-xl"
-                title="Edit"
+                onClick={() => navigate(`/restaurant/edit/${restaurant?._id}`)}
+                className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full font-semibold"
               >
-                <LuPencil />
+                Edit
               </button>
               <button
                 onClick={handleDeleteRestaurant}
-                className="bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-full shadow-sm transition flex items-center justify-center text-xl"
-                title="Delete"
+                className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold"
               >
-                <LuTrash2 />
+                Delete
               </button>
             </div>
           </div>
+        </div>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-            {restaurant ? (
-              <div className="space-y-4">
-                {/* <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                  🍴 Restaurant Details
-                </h2> */}
-                {restaurant.image && (
-                  <img
-                    src={`${restaurantUrl}/uploads/${restaurant.image}`}
-                    alt="restaurant"
-                    className="rounded-2xl w-full max-w-full object-cover shadow-md"
-                  />
-                )}
-
-                <div className="text-center text-gray-800 space-y-4">
-                  <div>
-                    {/* <span className="block text-base text-gray-500 font-medium">
-                      Name
-                    </span> */}
-                    <h2 className="text-4xl font-bold text-blue-800 tracking-wide">
-                      {restaurant.name}
-                    </h2>
-                  </div>
-
-                  <div>
-                    {/* <span className="block text-base text-gray-500 font-medium">
-                      Address
-                    </span> */}
-                    <p className="text-xl font-bold text-blue-800 italic">
-                      {restaurant.address}
-                    </p>
-                  </div>
-
-                  <div>
-                    {/* <span className="block text-base text-gray-500 font-medium">
-                      Address
-                    </span> */}
-                    <p className="text-xl font-bold text-blue-800 italic">
-                      {restaurant.location}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-2">
-                    {/* <span className="block text-base text-gray-500 font-medium">
-                      Status
-                    </span> */}
-                    {restaurant.available ? (
-                      <span className="inline-block bg-green-100 text-green-700 font-semibold px-4 py-1 rounded-full text-lg shadow-sm animate-pulse">
-                        ✅ Open
-                      </span>
-                    ) : (
-                      <span className="inline-block bg-red-100 text-red-600 font-semibold px-4 py-1 rounded-full text-lg shadow-sm animate-pulse">
-                        ❌ Closed
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-600 italic">No restaurant created yet.</p>
-            )}
+        {/* Top 5 Items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          {/* Top 5 Ordered */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <h3 className="text-2xl font-bold mb-4">Top 5 Most Ordered Items</h3>
+            <ul className="space-y-3">
+              {topOrderedItems.map((item) => (
+                <li key={item._id} className="flex justify-between text-sm">
+                  <span>{item.name}</span>
+                  <span className="font-bold">{item.ordersCount} orders</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {!restaurant && (
-              <button
-                onClick={() => setIsCreateOpen(true)}
-                className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-xl transition shadow-md"
-              >
-                ➕ Create Restaurant
-              </button>
-            )}
-          </div> */}
-          <div className="grid  gap-4">
-            {!restaurant && (
-              <button
-                onClick={() => setIsCreateOpen(true)}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 hover:from-green-500 hover:via-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Plus className="w-5 h-5" />
-                Create Restaurant
-              </button>
-            )}
+          {/* Recently Added (Name + Price) */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <h3 className="text-2xl font-bold mb-4">Recently Added Items</h3>
+            <ul className="space-y-3">
+              {topRecentItems.map((item) => (
+                <li key={item._id} className="flex justify-between text-sm">
+                  <span>{item.name}</span>
+                  <span className="font-bold">${item.price.toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+
         </div>
       </div>
-
-      {/* Create Restaurant Modal */}
-      <Transition appear show={isCreateOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-50"
-          onClose={() => setIsCreateOpen(false)}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-full p-4">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 text-left shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-bold leading-6 text-purple-600"
-                  >
-                    Create New Restaurant
-                  </Dialog.Title>
-                  <form
-                    className="mt-4 space-y-4"
-                    onSubmit={handleCreateRestaurant}
-                  >
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Restaurant Name
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        required
-                        value={form.name}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Address
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        required
-                        value={form.address}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Location(City)
-                      </label>
-                      <input
-                        type="text"
-                        name="location"
-                        required
-                        value={form.location}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Image
-                      </label>
-                      <input
-                        type="file"
-                        name="image"
-                        accept="image/*"
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 mt-1 text-gray-700"
-                      />
-                    </div>
-                    <div className="flex justify-end pt-4">
-                      <button
-                        type="submit"
-                        className="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                      >
-                        Submit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsCreateOpen(false)}
-                        className="ml-3 px-5 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
-
-      {/* Edit Modal */}
-      <Dialog
-        open={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md bg-white rounded-xl shadow-xl p-6 space-y-4">
-            <Dialog.Title className="text-xl font-bold">
-              Edit Restaurant
-            </Dialog.Title>
-            <form onSubmit={handleEditSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Restaurant Name
-                </label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, name: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter restaurant name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  value={editForm.address}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, address: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter address"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Location (City)
-                </label>
-                <input
-                  type="text"
-                  value={editForm.location}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, location: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter location"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Image (optional)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      image: e.target.files?.[0] || null,
-                    })
-                  }
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Status
-                </label>
-                <div className="flex items-center gap-3">
-                  <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editForm.available}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          available: e.target.checked,
-                        })
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:bg-green-400 relative transition-all duration-300">
-                      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-full"></div>
-                    </div>
-                    <span className="ml-3 text-sm text-gray-700">
-                      {editForm.available ? "Open" : "Closed"}
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
     </AdminLayout>
   );
 };

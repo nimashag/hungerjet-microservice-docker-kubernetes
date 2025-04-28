@@ -13,6 +13,7 @@ interface Restaurant {
   _id: string;
   name: string;
   address: string;
+  location: string;
   image?: string;
   available: boolean;
 }
@@ -23,12 +24,14 @@ export const AdminDashboard: React.FC = () => {
   const [form, setForm] = useState({
     name: "",
     address: "",
+    location: "",
     image: null as File | null,
   });
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     address: "",
+    location: "",
     available: false,
     image: null as File | null,
   });
@@ -79,9 +82,15 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
+    if (!form.location.trim()) {
+      Swal.fire("Validation Error", "Location is required.", "warning");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", form.name);
     formData.append("address", form.address);
+    formData.append("location", form.location);
     if (form.image) formData.append("image", form.image);
 
     try {
@@ -105,6 +114,7 @@ export const AdminDashboard: React.FC = () => {
     setEditForm({
       name: restaurant.name,
       address: restaurant.address,
+      location: restaurant.location,
       image: null,
       available: restaurant.available,
     });
@@ -125,9 +135,15 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
+    if (!editForm.location.trim()) {
+      Swal.fire("Validation Error", "Location is required.", "warning");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", editForm.name);
     formData.append("address", editForm.address);
+    formData.append("location", editForm.location);
     formData.append("available", String(editForm.available));
     if (editForm.image) {
       formData.append("image", editForm.image);
@@ -237,6 +253,15 @@ export const AdminDashboard: React.FC = () => {
                     </span> */}
                     <p className="text-xl font-bold text-blue-800 italic">
                       {restaurant.address}
+                    </p>
+                  </div>
+
+                  <div>
+                    {/* <span className="block text-base text-gray-500 font-medium">
+                      Address
+                    </span> */}
+                    <p className="text-xl font-bold text-blue-800 italic">
+                      {restaurant.location}
                     </p>
                   </div>
 
@@ -354,6 +379,19 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
+                        Location(City)
+                      </label>
+                      <input
+                        type="text"
+                        name="location"
+                        required
+                        value={form.location}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
                         Image
                       </label>
                       <input
@@ -428,6 +466,22 @@ export const AdminDashboard: React.FC = () => {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter address"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Location (City)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.location}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, location: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter location"
                   required
                 />
               </div>

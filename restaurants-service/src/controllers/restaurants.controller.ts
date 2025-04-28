@@ -6,15 +6,14 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
   try {
     console.log("[create]▶️ Creating a new restaurant:", req.body);
 
-    const { name, address } = req.body;
+    const { name, address, location } = req.body;
     const image = req.file?.filename;
 
-    // const hardcodedUserId = "661fdbecf622d9bd45edb859"; // Replace with your actual ObjectId string
 
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
     const restaurant = await restaurantsService.createRestaurant(
-      { name, address, image },
+      { name, address, location, image },
       req.user.id
     );
 

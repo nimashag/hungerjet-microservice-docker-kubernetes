@@ -3,6 +3,7 @@ import axios from "axios";
 import AdminLayout from "./RestaurantAdminLayout";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { motion } from "framer-motion";
 
 interface Restaurant {
   _id: string;
@@ -16,6 +17,7 @@ interface OrderItem {
 
 interface Order {
   _id: string;
+  userId: string;
   customerName: string;
   totalAmount: number;
   status: string;
@@ -73,9 +75,16 @@ const RestaurantOrders = () => {
 
   const toggleOrderStatus = async (orderId: string, currentStatus: string) => {
     try {
-      const newStatus = currentStatus === "Pending" ? "Confirmed" : "Pending";
+      let newStatus = "";
+  
+      if (currentStatus === "Pending") newStatus = "Confirmed";
+      else if (currentStatus === "Confirmed") newStatus = "Preparing";
+      else if (currentStatus === "Preparing") newStatus = "Waiting for Pickup";
+      else return; // No further action if already Waiting for Pickup
+  
       const token = localStorage.getItem("token");
-
+  
+      // 1. Update the Order Status first
       await axios.put(
         `http://localhost:3002/api/orders/${orderId}`,
         { status: newStatus },
@@ -85,18 +94,42 @@ const RestaurantOrders = () => {
           },
         }
       );
-
-      // Update orders state locally
+  
+      // 2. Update local UI
       setOrders((prev) =>
         prev.map((order) =>
           order._id === orderId ? { ...order, status: newStatus } : order
         )
       );
+  
+      // 3. IF newStatus === "Waiting for Pickup", THEN call DeliveryService assign
+      if (newStatus === "Waiting for Pickup") {
+        try {
+          // Find the order we just updated (to get customerId, restaurantId)
+          const order = orders.find((o) => o._id === orderId);
+          console.log("Order to assign:", order);
+          if (!order) {
+            console.error("Order not found in local state");
+            return;
+          }
+  
+          // Assuming you have restaurant _id stored in restaurant state
+          const response = await axios.post(`http://localhost:3000/api/delivery/assign`, {
+            orderId: order._id,
+            customerId: order.userId|| "",  
+            restaurantId: restaurant?._id || "",
+          });
+  
+          console.log("Driver assigned successfully:", response.data);
+        } catch (assignError) {
+          console.error("Failed to assign driver:", assignError);
+        }
+      }
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
   };
-
+  
   const generateReport = () => {
     const doc = new jsPDF();
 
@@ -169,9 +202,7 @@ const RestaurantOrders = () => {
     <AdminLayout>
       <div className="p-6">
         <div className="flex justify-between items-center mb-6 gap-4">
-          <h1 className="text-3xl font-bold  text-gray-800">
-            Customer Orders
-          </h1>
+          <h1 className="text-3xl font-bold  text-gray-800">Customer Orders</h1>
           <button
             onClick={generateReport}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow"
@@ -223,7 +254,7 @@ const RestaurantOrders = () => {
                     ))}
                   </td>
                   <td className="px-6 py-4 font-medium text-neutral-600">
-                    ${order.totalAmount.toFixed(2)}
+                    ${order.totalAmount}
                   </td>
                   <td className="px-6 py-4 font-medium text-neutral-600">
                     <span
@@ -240,21 +271,58 @@ const RestaurantOrders = () => {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 font-medium text-neutral-600">
-                    <button
-                      onClick={() => toggleOrderStatus(order._id, order.status)}
-                      //   disabled={order.status === "Confirmed"}
-                      className={`flex items-center gap-2 px-4 py-1 rounded-full text-lg font-medium transition duration-300 ${
-                        order.status === "Pending"
-                          ? " text-red-700"
-                          : " text-green-800 cursor-default"
-                      }`}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex flex-row items-center gap-4"
                     >
-                      {order.status === "Pending" ? (
-                        <>⌛ Pending</>
-                      ) : (
-                        <>✅ Confirmed</>
+                      {/* Status Badge */}
+                      <span
+                        className={`inline-block px-4 py-2 rounded-full text-md font-semibold
+                      ${
+                        order.status === "Pending"
+                          ? "bg-red-100 text-red-700"
+                          : order.status === "Confirmed"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : order.status === "Preparing"
+                          ? "bg-blue-100 text-blue-700"
+                          : order.status === "Waiting for Pickup"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                      >
+                        {order.status}
+                      </span>
+
+                      {/* Next Step Button */}
+                      {order.status !== "Waiting for Pickup" && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() =>
+                            toggleOrderStatus(order._id, order.status)
+                          }
+                          disabled={order.paymentStatus !== "Paid"} // << only allow if Paid
+                          className={`inline-block px-4 py-2 rounded-full text-md font-semibold shadow transition-all duration-300
+                        ${
+                          order.paymentStatus !== "Paid"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : order.status === "Pending"
+                            ? "bg-yellow-400 hover:bg-yellow-500 text-white"
+                            : order.status === "Confirmed"
+                            ? "bg-blue-400 hover:bg-blue-500 text-white"
+                            : order.status === "Preparing"
+                            ? "bg-green-400 hover:bg-green-500 text-white"
+                            : ""
+                        }`}
+                        >
+                          {order.paymentStatus !== "Paid"
+                            ? "Waiting for Payment"
+                            : "Move to Next Step"}
+                        </motion.button>
                       )}
-                    </button>
+                    </motion.div>
                   </td>
                 </tr>
               ))}

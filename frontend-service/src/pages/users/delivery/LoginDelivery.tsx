@@ -9,6 +9,8 @@ const LoginDelivery = () => {
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  const API_BASE =  'http://localhost:3003';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: '' });
@@ -40,23 +42,47 @@ const LoginDelivery = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!validateForm()) return;
-
+  
     try {
-      const res = await axios.post('http://localhost:3003/api/auth/login', form);
-
-      // TODO: Check if user.role === 'deliveryPersonnel'
+      const res = await axios.post(`${API_BASE}/api/auth/login`, form);
+  
+      //  Save token and user after successful login
       if (res.data.user.role === 'deliveryPersonnel') {
-        navigate('/delivery-home');
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+  
+        const token = res.data.token;
+        try {
+          //  Immediately check if driver profile exists
+          const profileRes = await axios.get('http://localhost:3004/api/drivers/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          console.log("Driver profile found ");
+          navigate('/driver/dashboard'); //  Driver profile exists
+  
+        } catch (profileErr: any) {
+          if (profileErr.response?.status === 404) {
+            console.log("Driver profile missing  Redirecting to register profile...");
+            navigate('/driver/register-profile'); //  Driver profile missing
+          } else {
+            console.error("Error checking driver profile", profileErr);
+            alert('Error verifying driver profile. Please try again.');
+          }
+        }
       } else {
         alert('Access denied: Not a delivery personnel.');
       }
     } catch (err: any) {
+      console.error(err);
       alert(err.response?.data?.message || 'Login failed');
     }
   };
-
+  
   const handleMouseEnter = () => {
     gsap.to(liquidRef.current, {
       x: 0,

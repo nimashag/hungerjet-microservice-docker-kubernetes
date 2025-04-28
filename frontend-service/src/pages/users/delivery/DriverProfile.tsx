@@ -1,41 +1,72 @@
-import DriverLayout from "./DriverLayout.tsx";
+import DriverLayout from "./DriverLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
 const DriverProfile = () => {
-  const [pickupLocation, setPickupLocation] = useState('');
-  const [deliveryLocations, setDeliveryLocations] = useState('');
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [deliveryLocations, setDeliveryLocations] = useState("");
   const [isAvailable, setIsAvailable] = useState(false);
 
-  const API_BASE =  'http://localhost:3000';
+  const API_BASE = "http://localhost:3004";
 
   useEffect(() => {
     const fetchDriverProfile = async () => {
+      const token = localStorage.getItem("token");
+      console.log("Driver Token:", token);
+
+      if (!token) {
+        console.error("No token found!");
+        return;
+      }
+
       try {
-        const res = await axios.get(`${API_BASE}/api/drivers/me`);
+        const res = await axios.get(`${API_BASE}/api/drivers/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setPickupLocation(res.data.pickupLocation);
-        setDeliveryLocations(res.data.deliveryLocations.join(', '));
+        setDeliveryLocations(res.data.deliveryLocations.join(", "));
         setIsAvailable(res.data.isAvailable);
       } catch (error) {
-        console.error('Error fetching driver profile', error);
+        console.error("Error fetching driver profile", error);
       }
     };
+
     fetchDriverProfile();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+    console.log("Driver Token:", token);
+
+    if (!token) {
+      console.error("No token found!");
+      return;
+    }
+
     try {
-      const deliveryArray = deliveryLocations.split(',').map((loc) => loc.trim());
-      await axios.patch(`${API_BASE}/api/drivers/me`, {
-        pickupLocation,
-        deliveryLocations: deliveryArray,
-        isAvailable,
-      });
-      alert('Profile updated successfully!');
+      const deliveryArray = deliveryLocations
+        .split(",")
+        .map((loc) => loc.trim());
+      await axios.patch(
+        `${API_BASE}/api/drivers/me`,
+        {
+          pickupLocation,
+          deliveryLocations: deliveryArray,
+          isAvailable,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Profile updated successfully!");
     } catch (error) {
-      console.error('Error updating profile', error);
-      alert('Failed to update profile.');
+      console.error("Error updating profile", error);
+      alert("Failed to update profile.");
     }
   };
 
@@ -45,17 +76,32 @@ const DriverProfile = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label>Pickup Location</label>
-          <input value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} className="border p-2 w-full" />
+          <input
+            value={pickupLocation}
+            onChange={(e) => setPickupLocation(e.target.value)}
+            className="border p-2 w-full"
+          />
         </div>
         <div>
           <label>Delivery Locations (comma separated)</label>
-          <input value={deliveryLocations} onChange={(e) => setDeliveryLocations(e.target.value)} className="border p-2 w-full" />
+          <input
+            value={deliveryLocations}
+            onChange={(e) => setDeliveryLocations(e.target.value)}
+            className="border p-2 w-full"
+          />
         </div>
         <div>
           <label>Availability</label>
-          <input type="checkbox" checked={isAvailable} onChange={(e) => setIsAvailable(e.target.checked)} className="ml-2" />
+          <input
+            type="checkbox"
+            checked={isAvailable}
+            onChange={(e) => setIsAvailable(e.target.checked)}
+            className="ml-2"
+          />
         </div>
-        <button type="submit" className="bg-blue-600 text-white p-2 rounded">Save</button>
+        <button type="submit" className="bg-blue-600 text-white p-2 rounded">
+          Save
+        </button>
       </form>
     </DriverLayout>
   );

@@ -1,19 +1,23 @@
-import express from 'express';
-import * as DeliveryController from '../controllers/delivery.controller';
+import { Router } from 'express';
+import { assignDriverAutomatically, respondToAssignment, getAssignedOrders,getMyDeliveries, updateDeliveryStatus } from '../controllers/delivery.controller';
+import { authenticate } from '../middleware/auth'; // <--- correct path
+import { authorizeRoles } from '../middleware/authorize'; // <--- correct path
 
-const router = express.Router();
+const router = Router();
 
-// Static/specific routes first
-router.post('/create', DeliveryController.createDelivery);
-router.patch('/:id/assign', DeliveryController.assignDriver);
-router.patch('/:id/accept', DeliveryController.acceptDelivery); // have to add authmiddleware to this
-router.patch('/:id/status', DeliveryController.updateStatus);
-router.patch('/:id/location', DeliveryController.updateDeliveryLocation);
+// Admin/system will assign driver (no role restriction, just authenticated)
+router.post('/assign', authenticate, assignDriverAutomatically);
 
-// Specific before dynamic
-router.get('/driver/:driverId/active', DeliveryController.getActiveDeliveryForDriver);
+// Driver only can respond to assignment
+router.post('/respond', authenticate, authorizeRoles('deliveryPersonnel'), respondToAssignment);
 
-// Place this LAST
-router.get('/:id', DeliveryController.getDeliveryById);
+// Driver only can view assigned orders
+router.get('/assigned-orders', authenticate, authorizeRoles('deliveryPersonnel'), getAssignedOrders);
+
+// ✅ Fetch all deliveries for my dashboard
+router.get('/my-deliveries', authenticate, authorizeRoles('deliveryPersonnel'), getMyDeliveries);
+
+// ✅ Update delivery status (PickedUp, Delivered, Cancelled)
+router.patch('/delivery/:deliveryId/status', authenticate, authorizeRoles('deliveryPersonnel'), updateDeliveryStatus);
 
 export default router;

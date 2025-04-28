@@ -1,27 +1,54 @@
-import DriverLayout from "./DriverLayout.tsx";
+import DriverLayout from "./DriverLayout";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const DriverDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const navigate = useNavigate();
 
-  const API_BASE = 'http://localhost:3000';
+  const API_BASE = 'http://localhost:3004';
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    console.log('Driver Token:', token);
+
+    if (!token) {
+      console.log('No token found! Redirecting to login.');
+      navigate('/login/delivery');
+      return;
+    }
+
     const fetchAssignedOrders = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/api/delivery/assigned-orders`);
+        const res = await axios.get(`${API_BASE}/api/delivery/assigned-orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setOrders(res.data);
       } catch (error) {
         console.error('Error fetching orders', error);
       }
     };
     fetchAssignedOrders();
-  }, []);
+  }, [navigate]);
 
   const handleResponse = async (orderId: string, action: 'accept' | 'decline') => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.log('No token found while responding. Redirecting to login.');
+      navigate('/login/delivery');
+      return;
+    }
+
     try {
-      await axios.post(`${API_BASE}/api/delivery/respond`, { orderId, action });
+      await axios.post(`${API_BASE}/api/delivery/respond`, { orderId, action }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setOrders((prev) => prev.filter((order) => order.orderId !== orderId));
     } catch (error) {
       console.error('Error responding to assignment', error);
@@ -42,8 +69,18 @@ const DriverDashboard = () => {
               <p><strong>Status:</strong> {order.status}</p>
 
               <div className="flex gap-4 mt-4">
-                <button onClick={() => handleResponse(order.orderId, 'accept')} className="bg-green-500 text-white p-2 rounded">Accept</button>
-                <button onClick={() => handleResponse(order.orderId, 'decline')} className="bg-red-500 text-white p-2 rounded">Decline</button>
+                <button
+                  onClick={() => handleResponse(order.orderId, 'accept')}
+                  className="bg-green-500 text-white p-2 rounded"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleResponse(order.orderId, 'decline')}
+                  className="bg-red-500 text-white p-2 rounded"
+                >
+                  Decline
+                </button>
               </div>
             </div>
           ))}

@@ -112,11 +112,19 @@ const RestaurantOrders = () => {
           }
   
           // Assuming you have restaurant _id stored in restaurant state
-          const response = await axios.post(`http://localhost:3000/api/delivery/assign`, {
-            orderId: order._id,
-            customerId: order.userId|| "",  
-            restaurantId: restaurant?._id || "",
-          });
+          const response = await axios.post(
+            `${deliveryUrl}/api/delivery/assign`,
+            {
+              orderId: order._id,
+              customerId: order.userId || "",  
+              restaurantId: restaurant?._id || "",
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
   
           console.log("Driver assigned successfully:", response.data);
         } catch (assignError) {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const DriverProfileRegister = () => {
   const [pickupLocation, setPickupLocation] = useState('');
@@ -11,7 +12,7 @@ const DriverProfileRegister = () => {
   const [isAvailable, setIsAvailable] = useState(true);
 
   const navigate = useNavigate();
-  const DRIVER_API = 'http://localhost:3004'; // Driver service
+  // const DRIVER_API = 'http://localhost:3004'; // Driver service
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,7 @@ const DriverProfileRegister = () => {
         formData.append('profileImage', profileImage);
       }
 
-      await axios.post(`${DRIVER_API}/api/drivers/register`, formData, {
+      await axios.post(`${deliveryUrl}/api/drivers/register`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',

@@ -2,15 +2,13 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import axios from "axios";
-import { userUrl } from "../../../api";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const LoginDelivery = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const liquidRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  const API_BASE =  'http://localhost:3003';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -47,7 +45,7 @@ const LoginDelivery = () => {
     if (!validateForm()) return;
   
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, form);
+      const res = await axios.post(`${userUrl}/api/auth/login`, form);
   
       //  Save token and user after successful login
       if (res.data.user.role === 'deliveryPersonnel') {
@@ -57,7 +55,7 @@ const LoginDelivery = () => {
         const token = res.data.token;
         try {
           //  Immediately check if driver profile exists
-          const profileRes = await axios.get('http://localhost:3004/api/drivers/me', {
+          const profileRes = await axios.get(`${deliveryUrl}/api/drivers/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

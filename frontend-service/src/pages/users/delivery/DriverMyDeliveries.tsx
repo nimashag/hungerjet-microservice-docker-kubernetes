@@ -3,6 +3,7 @@ import axios from 'axios';
 import DriverLayout from './DriverLayout';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 interface Delivery {
   _id: string;
@@ -27,13 +28,11 @@ const DriverMyDeliveries = () => {
   const [modalDeliveryId, setModalDeliveryId] = useState<string | null>(null);
   const [modalAction, setModalAction] = useState<'PickedUp' | 'Delivered' | 'Cancelled' | null>(null);
 
-  const API_BASE = 'http://localhost:3004';
-
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${API_BASE}/api/delivery/my-deliveries`, {
+        const res = await axios.get(`${deliveryUrl}/api/delivery/my-deliveries`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -60,7 +59,7 @@ const DriverMyDeliveries = () => {
     if (!modalDeliveryId || !modalAction) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${API_BASE}/api/delivery/delivery/${modalDeliveryId}/status`, 
+      await axios.patch(`${deliveryUrl}/api/delivery/delivery/${modalDeliveryId}/status`, 
         { status: modalAction },
         {
           headers: {

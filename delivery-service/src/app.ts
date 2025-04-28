@@ -6,11 +6,15 @@ import deliveryRoutes from './routes/delivery.routes';
 import driverRoutes from './routes/driver.routes';
 
 const app = express();
+
 //Allow requests from your frontend
 app.use(cors({
     origin: 'http://localhost:5173',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   }));
+
+
 app.use(express.json());
 
 app.use('/api/drivers', driverRoutes);

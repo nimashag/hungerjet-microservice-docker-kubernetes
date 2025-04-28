@@ -1,13 +1,14 @@
 import DriverLayout from "./DriverLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const DriverProfile = () => {
   const [pickupLocation, setPickupLocation] = useState("");
   const [deliveryLocations, setDeliveryLocations] = useState("");
   const [isAvailable, setIsAvailable] = useState(false);
 
-  const API_BASE = "http://localhost:3004";
+  // const API_BASE = "http://localhost:3004";
 
   useEffect(() => {
     const fetchDriverProfile = async () => {
@@ -20,7 +21,7 @@ const DriverProfile = () => {
       }
 
       try {
-        const res = await axios.get(`${API_BASE}/api/drivers/me`, {
+        const res = await axios.get(`${deliveryUrl}/api/drivers/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -51,7 +52,7 @@ const DriverProfile = () => {
         .split(",")
         .map((loc) => loc.trim());
       await axios.patch(
-        `${API_BASE}/api/drivers/me`,
+        `${deliveryUrl}/api/drivers/me`,
         {
           pickupLocation,
           deliveryLocations: deliveryArray,

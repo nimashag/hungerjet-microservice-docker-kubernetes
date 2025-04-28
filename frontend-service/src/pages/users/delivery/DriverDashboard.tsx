@@ -2,12 +2,11 @@ import DriverLayout from "./DriverLayout";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
 
 const DriverDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const navigate = useNavigate();
-
-  const API_BASE = 'http://localhost:3004';
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -21,7 +20,7 @@ const DriverDashboard = () => {
 
     const fetchAssignedOrders = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/api/delivery/assigned-orders`, {
+        const res = await axios.get(`${deliveryUrl}/api/delivery/assigned-orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -44,7 +43,7 @@ const DriverDashboard = () => {
     }
 
     try {
-      await axios.post(`${API_BASE}/api/delivery/respond`, { orderId, action }, {
+      await axios.post(`${deliveryUrl}/api/delivery/respond`, { orderId, action }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

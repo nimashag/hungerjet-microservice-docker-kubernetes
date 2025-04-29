@@ -39,6 +39,7 @@ import Reviews from './pages/users/customer/components/Reviews';
 import DriverProfile from './pages/users/delivery/DriverProfile';
 import DriverDashboard from './pages/users/delivery/DriverDashboard';
 import DriverProfileRegister from './pages/users/delivery/DriverProfileRegister';
+import DriverMyDeliveries from './pages/users/delivery/DriverMyDeliveries';
 
 
 function App() {
@@ -111,6 +112,7 @@ function App() {
                 <Route path="/driver/dashboard" element={<DriverDashboard />} />
                 <Route path="/driver/profile" element={<DriverProfile />} />
                 <Route path="/driver/register-profile" element={<DriverProfileRegister />} />
+                <Route path="/driver/mydeliveries" element={<DriverMyDeliveries />} />
 
 
             </Routes>

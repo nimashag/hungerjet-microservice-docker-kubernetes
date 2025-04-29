@@ -80,7 +80,7 @@ const DriverMyDeliveries = () => {
   };
 
   const ongoingDeliveries = deliveries.filter(
-    (d) => d.status === 'Assigned' || d.status === 'PickedUp'
+    (d) => d.acceptStatus === 'Accepted' 
   );
 
   const completedDeliveries = deliveries.filter(

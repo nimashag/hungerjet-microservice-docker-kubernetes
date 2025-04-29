@@ -6,6 +6,7 @@ import {
   LogOut,
   Menu,
   X,
+  Truck,
 } from "lucide-react";
 
 interface DriverLayoutProps {
@@ -45,12 +46,14 @@ const DriverLayout = ({ children }: DriverLayoutProps) => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/login/delivery");
   };
 
   const navigation = [
     { name: "Dashboard", href: "/driver/dashboard", icon: LayoutDashboard },
     { name: "Profile", href: "/driver/profile", icon: UserCircle },
+    { name: "My Deliveries", href: "/driver/mydeliveries", icon: Truck },
+   
   ];
 
   return (

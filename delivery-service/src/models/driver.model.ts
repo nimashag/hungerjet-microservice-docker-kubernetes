@@ -7,18 +7,18 @@ export interface DriverDocument extends Document {
   vehicleRegNumber: string;
   mobileNumber: string;
   isAvailable: boolean;
-  profileImage?: string; // ✅ New Field
+  profileImage?: string; //  New Field
 }
 
 const driverSchema = new Schema<DriverDocument>(
   {
     userId: { type: String, required: true },
-    pickupLocation: { type: String, required: true },
-    deliveryLocations: { type: [String], required: true },
+    pickupLocation: { type: String,},
+    deliveryLocations: { type: [String],},
     vehicleRegNumber: { type: String, required: true, unique: true },
     mobileNumber: { type: String, required: true },
     isAvailable: { type: Boolean, default: true },
-    profileImage: { type: String }, // ✅ Optional
+    profileImage: { type: String }, //  Optional
   },
   { timestamps: true }
 );

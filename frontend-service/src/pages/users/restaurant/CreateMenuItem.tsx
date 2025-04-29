@@ -12,8 +12,32 @@ const CreateMenuItem = () => {
     price: 0,
     imageFile: undefined as File | undefined,
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    category: "",
+    description: "",
+    price: "",
+    imageFile: "",
+  });
+  
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    const newErrors = {
+      name: form.name.trim() ? "" : "Name is required.",
+      category: form.category.trim() ? "" : "Category is required.",
+      description: form.description.trim() ? "" : "Description is required.",
+      price: form.price > 0 ? "" : "Price must be greater than 0.",
+      imageFile: form.imageFile ? "" : "Image is required.",
+    };
+  
+    setErrors(newErrors);
+  
+    // Return true only if there are no errors
+    return Object.values(newErrors).every((err) => err === "");
+  };
+  
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -42,6 +66,11 @@ const CreateMenuItem = () => {
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      Swal.fire("Validation Error", "Please fill all fields and upload an image.", "warning");
+      return;
+    }
+
     if (!form.name || !form.category || !form.description || !form.price || !form.imageFile) {
       Swal.fire("Validation Error", "Please fill all fields and upload an image.", "warning");
       return;
@@ -92,6 +121,7 @@ const CreateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -103,6 +133,7 @@ const CreateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
             </div>
 
             <div>
@@ -113,6 +144,7 @@ const CreateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div>
@@ -124,6 +156,7 @@ const CreateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
             </div>
 
             <div>
@@ -135,6 +168,7 @@ const CreateMenuItem = () => {
                 onChange={handleImageChange}
                 className="w-full"
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.imageFile}</p>}
             </div>
 
             <div className="flex justify-end gap-3 pt-6">

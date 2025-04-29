@@ -13,10 +13,29 @@ const EditRestaurant: React.FC = () => {
     available: false,
     image: null as File | null,
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    address: "",
+    location: "",
+  });
+  
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+
+  const validateForm = () => {
+    const newErrors = {
+      name: form.name.trim() ? "" : "Restaurant name is required.",
+      address: form.address.trim() ? "" : "Address is required.",
+      location: form.location.trim() ? "" : "Location is required.",
+    };
+  
+    setErrors(newErrors);
+  
+    return Object.values(newErrors).every((error) => error === "");
+  };
+  
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -56,6 +75,11 @@ const EditRestaurant: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+
+    if (!validateForm()) {
+      Swal.fire("Validation Error", "Please fill in all required fields correctly.", "warning");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", form.name);
@@ -101,6 +125,7 @@ const EditRestaurant: React.FC = () => {
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -113,6 +138,7 @@ const EditRestaurant: React.FC = () => {
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
             </div>
 
             <div>
@@ -125,6 +151,7 @@ const EditRestaurant: React.FC = () => {
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
             </div>
 
             <div className="flex items-center gap-2">

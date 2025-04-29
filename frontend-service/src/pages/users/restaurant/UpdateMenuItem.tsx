@@ -15,6 +15,13 @@ const UpdateMenuItem = () => {
     imageFile: undefined as File | undefined,
     existingImage: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    description: "",
+    category: "",
+    price: "",
+  });
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,8 +74,44 @@ const UpdateMenuItem = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.category || !form.description || !form.price) {
-      Swal.fire("Validation Error", "Please fill all fields.", "warning");
+    let validationErrors = {
+      name: "",
+      description: "",
+      category: "",
+      price: "",
+    };
+    let isValid = true;
+  
+    if (!form.name.trim()) {
+      validationErrors.name = "Name is required.";
+      isValid = false;
+    } else if (form.name.length < 2) {
+      validationErrors.name = "Name must be at least 2 characters.";
+      isValid = false;
+    }
+  
+    if (!form.category.trim()) {
+      validationErrors.category = "Category is required.";
+      isValid = false;
+    }
+  
+    if (!form.description.trim()) {
+      validationErrors.description = "Description is required.";
+      isValid = false;
+    } else if (form.description.length < 10) {
+      validationErrors.description = "Description must be at least 10 characters.";
+      isValid = false;
+    }
+  
+    if (form.price <= 0) {
+      validationErrors.price = "Price must be greater than 0.";
+      isValid = false;
+    }
+  
+    setErrors(validationErrors);
+  
+    if (!isValid) {
+      Swal.fire("Validation Error", "Please correct the highlighted fields.", "warning");
       return;
     }
 
@@ -115,6 +158,7 @@ const UpdateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -126,6 +170,7 @@ const UpdateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
             </div>
 
             <div>
@@ -136,6 +181,7 @@ const UpdateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
             </div>
 
             <div>
@@ -147,6 +193,7 @@ const UpdateMenuItem = () => {
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 dark:bg-gray-700"
               />
+              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.price}</p>}
             </div>
 
             <div>

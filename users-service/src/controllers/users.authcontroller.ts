@@ -81,6 +81,18 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+
+
+// GET ALL USERS – Admin Only
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await UserModel.find().select('-password');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users', error: err });
+  }
+};
+
 // GET CURRENT USER /me
 export const getMyProfile = async (req: Request, res: Response) => {
   try {
@@ -93,16 +105,6 @@ export const getMyProfile = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Get /me error:', err);
     res.status(500).json({ message: 'Failed to fetch user', error: err });
-  }
-};
-
-// GET ALL USERS – Admin Only
-export const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await UserModel.find().select('-password');
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch users', error: err });
   }
 };
 

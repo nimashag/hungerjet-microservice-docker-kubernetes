@@ -5,8 +5,8 @@ export const sendOrderStatusSMS = async (phoneNumber: string, orderId: string, s
   try {
     const response = await axios.get('https://www.textit.biz/sendmsg', {
       params: {
-        id: 'your-textit-username',
-        pw: 'your-textit-password',
+        id: '94713161255',
+        pw: '1892',
         to: phoneNumber,
         text: `🍽️ HungerJet: Your order (ID: #${orderId}) is now ${status}. Thank you for ordering with us!`
       }

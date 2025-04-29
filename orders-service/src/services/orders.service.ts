@@ -21,7 +21,7 @@ export const updateOrder = async (id: string, data: any, userEmail?: string) => 
   const updatedOrder = await Order.findByIdAndUpdate(id, data, { new: true });
 
   // Hardcoded phone number for now (international format)
-  const phoneNumber = '+94xxxxxxxxx'; // Replace with actual phone number
+  const phoneNumber = '+94713161255'; // Replace with actual phone number
 
   if (updatedOrder && data.status && oldOrder.status !== data.status) {
     try {

@@ -1,5 +1,7 @@
 import { Types } from "mongoose";
 import { Order } from '../models/order.model';
+import { sendOrderStatusEmail } from './email.service';
+import { sendOrderStatusSMS } from './sms.service'; 
 
 export const createOrder = (data: any, userId: string) => Order.create({ ...data, userId });
 
@@ -12,11 +14,29 @@ export const getOrdersByRestaurantId = (restaurantId: string) => {
   return Order.find({ restaurantId });
 };
 
-export const updateOrder = async (id: string, data: any) => {
-    const updatedOrder = await Order.findByIdAndUpdate(id, data, {
-      new: true,
-    });
-    return updatedOrder;
+export const updateOrder = async (id: string, data: any, userEmail?: string) => {
+  const oldOrder = await Order.findById(id);
+  if (!oldOrder) return null;
+
+  const updatedOrder = await Order.findByIdAndUpdate(id, data, { new: true });
+
+  // Hardcoded phone number for now (international format)
+  const phoneNumber = '+94xxxxxxxxx'; // Replace with actual phone number
+
+  if (updatedOrder && data.status && oldOrder.status !== data.status) {
+    try {
+      if (userEmail) {
+        await sendOrderStatusEmail(userEmail, updatedOrder._id.toString(), data.status);
+      }
+
+      await sendOrderStatusSMS(phoneNumber, updatedOrder._id.toString(), data.status);
+
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  }
+
+  return updatedOrder;
 };
 
 export const deleteOrder = async (id: string) => {

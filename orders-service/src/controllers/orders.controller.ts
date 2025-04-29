@@ -144,7 +144,15 @@ export const update = async (req: Request, res: Response) => {
 
     const updateData: any = { ...req.body };
 
-    const updated = await OrdersService.updateOrder(req.params.id, updateData);
+    // Get the order to fetch userId and user's email
+    const order = await OrdersService.getOrderById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Get user email
+    
+    const userEmail = "dev40.emailtest@gmail.com";
+
+    const updated = await OrdersService.updateOrder(req.params.id, updateData, userEmail);
 
     if (!updated) {
       return res.status(404).json({ message: "Order not found" });

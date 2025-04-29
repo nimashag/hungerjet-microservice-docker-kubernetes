@@ -179,7 +179,7 @@ const AdminDashboard: React.FC = () => {
               You haven't created a restaurant yet.
             </h2>
             <button
-              onClick={() => navigate("/create-restaurant")}
+              onClick={() => navigate("/restaurant/create")}
               className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-lg rounded-full font-semibold transition-all"
             >
               Create Restaurant

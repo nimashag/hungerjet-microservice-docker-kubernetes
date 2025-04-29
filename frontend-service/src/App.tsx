@@ -52,13 +52,13 @@ function App() {
         */}
         <Routes>
           {/* Restaurant routes */}
-          <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
+          {/* <Route path="/restaurant-dash" element={<RestaurantDashboard />} />
           <Route path="/restaurant-menu" element={<MenuItems />} />
           <Route path="/restaurant-orders" element={<RestaurantOrders />} />
           <Route
             path="/restaurant-analytics"
             element={<RestaurantAnalytics />}
-          />
+          /> */}
 
                 {/* Restaurant routes */}
                 <Route path="/restaurant-dash" element={<RestaurantDashboard />} />

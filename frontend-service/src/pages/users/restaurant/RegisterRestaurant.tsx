@@ -60,7 +60,7 @@ const RegisterRestaurant = () => {
       });
 
       alert(res.data.message || "Registered successfully!");
-      navigate("/restaurant/create");
+      navigate("/restaurant-dash");
     } catch (err: any) {
       alert(err.response?.data?.message || "Registration failed");
     }

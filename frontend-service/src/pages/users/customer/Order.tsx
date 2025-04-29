@@ -160,30 +160,47 @@ const Order: React.FC = () => {
   };
 
   const handlePayment = async () => {
-    try {
-      if (!orderId || !token) return;
-  
-      const res = await axios.post(
-        `${orderUrl}/api/orders/create-payment-intent`,
-        { 
-          totalAmount: order.totalAmount, 
-          orderId: order._id 
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-  
-      const { clientSecret } = res.data;
-      
-      navigate('/payment', { state: { clientSecret } });
-    } catch (error) {
-      console.error("Failed to create payment intent", error);
-      Swal.fire({
-        icon: "error",
-        title: "Payment Processing Error",
-        text: "We couldn't process your payment request. Please try again.",
-      });
-    }
-  };
+  try {
+    if (!orderId || !token) return;
+
+    // ✅ Fetch order from backend
+    const orderRes = await axios.get(`${orderUrl}/api/orders/${orderId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const order = orderRes.data;
+
+    // ✅ Create Payment Intent
+    const res = await axios.post(
+      `${orderUrl}/api/orders/create-payment-intent`,
+      {
+        totalAmount: order.totalAmount,
+        orderId: order._id,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const { clientSecret } = res.data;
+
+    // Store for fallback
+    localStorage.setItem('clientSecret', clientSecret);
+    localStorage.setItem('latestOrderId', order._id);
+
+    // ✅ Navigate with full order object
+    navigate('/payment', { state: { clientSecret, order } });
+
+  } catch (error) {
+    console.error("Failed to create payment intent", error);
+    Swal.fire({
+      icon: "error",
+      title: "Payment Processing Error",
+      text: "We couldn't process your payment request. Please try again.",
+    });
+  }
+};
+
   
   // Function to render order status badge
   const renderStatusBadge = (status: string) => {
@@ -330,7 +347,9 @@ const Order: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Package className="text-blue-600 mr-3" size={24} />
-            <h1 className="text-2xl font-semibold text-gray-800">Order Details</h1>
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Order Details
+            </h1>
           </div>
           {renderStatusBadge(order.status)}
         </div>
@@ -340,27 +359,50 @@ const Order: React.FC = () => {
             {/* Order Info */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
               <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
-                <h2 className="text-lg font-medium text-gray-800">Order Information</h2>
+                <h2 className="text-lg font-medium text-gray-800">
+                  Order Information
+                </h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                     <span className="text-gray-600">Order ID</span>
-                    <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{order._id}</span>
+                    <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                      {order._id}
+                    </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                     <span className="text-gray-600">Order Date</span>
                     <span className="text-gray-800">
                       {new Date(order.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                    <span className="text-gray-600">Total Amount</span>
-                    <span className="text-lg font-semibold text-gray-800">
-                      ${order.totalAmount?.toFixed(2)}
-                    </span>
+
+                  <div className="flex flex-col gap-3 pb-3 border-b border-gray-100 text-sm text-gray-600">
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span>${order.totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Fee</span>
+                      <span>$3.99</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tax (8%)</span>
+                      <span>${(order.totalAmount * 0.08).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-200 text-base font-semibold text-gray-800">
+                      <span>Total Amount</span>
+                      <span>
+                        $
+                        {(
+                          order.totalAmount +
+                          3.99 +
+                          order.totalAmount * 0.08
+                        ).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -371,7 +413,9 @@ const Order: React.FC = () => {
               <div className="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center">
                   <MapPin size={18} className="text-gray-700 mr-2" />
-                  <h2 className="text-lg font-medium text-gray-800">Delivery Address</h2>
+                  <h2 className="text-lg font-medium text-gray-800">
+                    Delivery Address
+                  </h2>
                 </div>
                 {!editingAddress && (
                   <button
@@ -389,69 +433,100 @@ const Order: React.FC = () => {
               <div className="p-6">
                 {!editingAddress ? (
                   <div className="space-y-1">
-                    <p className="text-gray-800">{order.deliveryAddress?.street}</p>
                     <p className="text-gray-800">
-                      {order.deliveryAddress?.city}, {order.deliveryAddress?.state} {order.deliveryAddress?.zipCode}
+                      {order.deliveryAddress?.street}
                     </p>
-                    <p className="text-gray-800">{order.deliveryAddress?.country}</p>
+                    <p className="text-gray-800">
+                      {order.deliveryAddress?.city},{" "}
+                      {order.deliveryAddress?.state}{" "}
+                      {order.deliveryAddress?.zipCode}
+                    </p>
+                    <p className="text-gray-800">
+                      {order.deliveryAddress?.country}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">Street Address</label>
+                      <label className="block text-sm text-gray-600 mb-1">
+                        Street Address
+                      </label>
                       <input
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Street"
                         value={newAddress.street}
                         onChange={(e) =>
-                          setNewAddress({ ...newAddress, street: e.target.value })
+                          setNewAddress({
+                            ...newAddress,
+                            street: e.target.value,
+                          })
                         }
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">City</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          City
+                        </label>
                         <input
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="City"
                           value={newAddress.city}
                           onChange={(e) =>
-                            setNewAddress({ ...newAddress, city: e.target.value })
+                            setNewAddress({
+                              ...newAddress,
+                              city: e.target.value,
+                            })
                           }
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">State</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          State
+                        </label>
                         <input
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="State"
                           value={newAddress.state}
                           onChange={(e) =>
-                            setNewAddress({ ...newAddress, state: e.target.value })
+                            setNewAddress({
+                              ...newAddress,
+                              state: e.target.value,
+                            })
                           }
                         />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">Zip Code</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          Zip Code
+                        </label>
                         <input
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Zip Code"
                           value={newAddress.zipCode}
                           onChange={(e) =>
-                            setNewAddress({ ...newAddress, zipCode: e.target.value })
+                            setNewAddress({
+                              ...newAddress,
+                              zipCode: e.target.value,
+                            })
                           }
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">Country</label>
+                        <label className="block text-sm text-gray-600 mb-1">
+                          Country
+                        </label>
                         <input
                           className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Country"
                           value={newAddress.country}
                           onChange={(e) =>
-                            setNewAddress({ ...newAddress, country: e.target.value })
+                            setNewAddress({
+                              ...newAddress,
+                              country: e.target.value,
+                            })
                           }
                         />
                       </div>
@@ -489,7 +564,9 @@ const Order: React.FC = () => {
               <div className="border-b border-gray-100 bg-gray-50 px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center">
                   <FileText size={18} className="text-gray-700 mr-2" />
-                  <h2 className="text-lg font-medium text-gray-800">Special Instructions</h2>
+                  <h2 className="text-lg font-medium text-gray-800">
+                    Special Instructions
+                  </h2>
                 </div>
                 {!editingInstructions && (
                   <button
@@ -507,7 +584,8 @@ const Order: React.FC = () => {
               <div className="p-6">
                 {!editingInstructions ? (
                   <p className="text-gray-700">
-                    {order.specialInstructions || "No special instructions provided."}
+                    {order.specialInstructions ||
+                      "No special instructions provided."}
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -545,7 +623,7 @@ const Order: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Order Summary & Payment Section */}
           <div className="lg:col-span-1 space-y-6">
             {/* Payment Section */}
@@ -553,7 +631,9 @@ const Order: React.FC = () => {
               <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
                 <div className="flex items-center">
                   <CreditCard size={18} className="text-gray-700 mr-2" />
-                  <h2 className="text-lg font-medium text-gray-800">Payment Information</h2>
+                  <h2 className="text-lg font-medium text-gray-800">
+                    Payment Information
+                  </h2>
                 </div>
               </div>
               <div className="p-6">
@@ -562,26 +642,33 @@ const Order: React.FC = () => {
                     <span className="text-gray-600">Payment Status</span>
                     {renderPaymentBadge(order.paymentStatus)}
                   </div>
-                  
+
                   <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                     <span className="text-gray-600">Payment Method</span>
                     <span className="font-medium text-gray-800">
                       {order.paymentMethod || "Not selected"}
                     </span>
                   </div>
-                  
+
                   <div className="pt-2">
                     <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
                       <div className="flex items-start">
-                        <DollarSign size={18} className="text-blue-600 mr-2 mt-0.5" />
+                        <DollarSign
+                          size={18}
+                          className="text-blue-600 mr-2 mt-0.5"
+                        />
                         <div>
-                          <p className="text-blue-800 font-medium">Total to Pay</p>
-                          <p className="text-2xl font-bold text-blue-900">${order.totalAmount?.toFixed(2)}</p>
+                          <p className="text-blue-800 font-medium">
+                            Total to Pay
+                          </p>
+                          <p className="text-2xl font-bold text-blue-900">
+                             ${(order.totalAmount + 3.99 + order.totalAmount * 0.08).toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
-                    {order.paymentStatus?.toLowerCase() !== 'paid' && (
+
+                    {order.paymentStatus?.toLowerCase() !== "paid" && (
                       <button
                         onClick={handlePayment}
                         className="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
@@ -594,11 +681,13 @@ const Order: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Order Actions */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
               <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
-                <h2 className="text-lg font-medium text-gray-800">Order Actions</h2>
+                <h2 className="text-lg font-medium text-gray-800">
+                  Order Actions
+                </h2>
               </div>
               <div className="p-6">
                 <button
@@ -608,11 +697,12 @@ const Order: React.FC = () => {
                   <XCircle size={18} className="mr-2" />
                   Cancel Order
                 </button>
-                
+
                 <div className="mt-4 text-xs text-gray-500">
                   <p>
-                    You can cancel your order if it hasn't been confirmed by the restaurant yet.
-                    Once the restaurant confirms your order, cancellation may not be possible.
+                    You can cancel your order if it hasn't been confirmed by the
+                    restaurant yet. Once the restaurant confirms your order,
+                    cancellation may not be possible.
                   </p>
                 </div>
               </div>

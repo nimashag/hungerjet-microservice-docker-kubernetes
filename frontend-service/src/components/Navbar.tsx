@@ -6,15 +6,32 @@ import logoicon1 from "../assets/Logo.png";
 import searchicon from "../assets/search_icon.png";
 import usericon from "../assets/user_icon.png";
 import carticon from "../assets/carticon.png";
+import { useCart } from '../contexts/CartContext';
 
 const Navbar: React.FC = () => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [isUserDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
+  const [cartCount, setCartCount] = useState<number>(0);
+  const { cartItemCount } = useCart();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLogged(!!token);
+
+    const updateCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    setCartCount(cart.length);
+  };
+
+  updateCartCount();
+
+  // Listen to storage changes (in case items added on a different page/tab)
+  window.addEventListener("storage", updateCartCount);
+
+  return () => {
+    window.removeEventListener("storage", updateCartCount);
+  };
   }, []);
 
   const toggleMobileMenu = () => {
@@ -112,14 +129,21 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Cart Icon */}
-        <Link to="/cart">
-          <motion.img
-            src={carticon}
-            className="w-6 cursor-pointer"
-            alt="Cart Icon"
-            whileHover={{ scale: 1.2 }}
-          />
-        </Link>
+        <div className="relative">
+          <Link to="/cart">
+            <motion.img
+              src={carticon}
+              className="w-6 cursor-pointer"
+              alt="Cart Icon"
+              whileHover={{ scale: 1.2 }}
+            />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
+        </div>
 
         {/* Hamburger Icon */}
         <motion.button

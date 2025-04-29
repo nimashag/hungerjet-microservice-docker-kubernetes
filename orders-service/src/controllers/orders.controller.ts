@@ -194,14 +194,23 @@ export const getCurrentUserOrders = async (req: AuthenticatedRequest, res: Respo
 
 export const createPaymentIntent = async (req: Request, res: Response) => {
   try {
-    const { totalAmount } = req.body;
+    const { totalAmount, items = [] } = req.body;
+    const deliveryFee = 3.99;
+    const tax = totalAmount * 0.08;
 
     if (!totalAmount || totalAmount <= 0) {
       return res.status(400).json({ message: "Total amount must be greater than 0." });
     }
 
+    const itemDetails = Array.isArray(req.body.items)
+  ? req.body.items.map((item: any) => ({
+      name: item.name,
+      price: item.price,
+    }))
+  : [];
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(totalAmount * 100), // 💳 Stripe accepts amounts in cents
+      amount: Math.round((totalAmount + deliveryFee + tax) * 100), // 💳 Stripe accepts amounts in cents
       currency: 'usd', // or your preferred currency
       payment_method_types: ['card'],
     });
@@ -209,7 +218,8 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
     console.log("✅ Created Payment Intent:", paymentIntent.id);
 
     res.json({ 
-      clientSecret: paymentIntent.client_secret 
+      clientSecret: paymentIntent.client_secret,
+      items: itemDetails
     });
   } catch (error) {
     console.error("Error creating Payment Intent:", error);

@@ -118,6 +118,11 @@ const RestaurantMenu: React.FC = () => {
       price: item.price,
       quantity: quantity,
     };
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  const updatedCart = [...existingCart, item];
+  localStorage.setItem("cart", JSON.stringify(updatedCart));
+  window.dispatchEvent(new Event("storage"));
     addToCart(cartItem);
     alert(`🛒 ${item.name} (x${quantity}) added to cart!`);
   };

@@ -93,6 +93,7 @@ function App() {
                 <Route path="/restaurants" element={<RestaurantList />} />
                 <Route path="/restaurants/:restaurantId" element={<RestaurantMenu />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/payment" element={<PaymentPage />} />
                 <Route path='/about' element={<About />} />
                 <Route path='/contactus' element={<ContactUs />} />
                 <Route path='/faqs' element={<FAQs />} />
@@ -105,7 +106,7 @@ function App() {
                 <Route path='/admin/drivers' element={<AdminDrivers />} />
                 <Route path='/admin/analytics' element={<AdminAnalytics />} />
 
-                <Route path="/payment" element={<PaymentPage />} />
+                
 
 
                 {/* Delivery Routes */}

@@ -4,6 +4,7 @@ import DriverLayout from './DriverLayout';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiBase, userUrl, restaurantUrl, orderUrl, deliveryUrl } from "../../../api";
+import DeliveryMap from './DeliveryMap';
 
 interface Delivery {
   _id: string;
@@ -27,6 +28,7 @@ const DriverMyDeliveries = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalDeliveryId, setModalDeliveryId] = useState<string | null>(null);
   const [modalAction, setModalAction] = useState<'PickedUp' | 'Delivered' | 'Cancelled' | null>(null);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDeliveries = async () => {
@@ -80,7 +82,7 @@ const DriverMyDeliveries = () => {
   };
 
   const ongoingDeliveries = deliveries.filter(
-    (d) => d.acceptStatus === 'Accepted' 
+    (d) => d.acceptStatus === 'Accepted' && d.status !== 'Delivered' && d.status !== 'Cancelled'
   );
 
   const completedDeliveries = deliveries.filter(
@@ -109,68 +111,101 @@ const DriverMyDeliveries = () => {
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6 text-center text-indigo-600">My Deliveries</h1>
 
-        {/* Ongoing Deliveries */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ongoing Deliveries</h2>
-          {ongoingDeliveries.length === 0 ? (
-            <p>No ongoing deliveries at the moment.</p>
-          ) : (
-            <div className="grid gap-6">
-              {ongoingDeliveries.map((delivery) => (
-                <div key={delivery._id} className="border p-4 rounded shadow-md bg-white">
-                  <p><strong>Restaurant:</strong> {delivery.restaurantLocation}</p>
-                  <p><strong>Customer Delivery Address:</strong> {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city}</p>
-                  <p><strong>Status:</strong> {statusBadge(delivery.status)}</p>
+        {/* Map View */}
+        {selectedDeliveryId && (
+          <div className="mb-8">
+            <button
+              onClick={() => setSelectedDeliveryId(null)}
+              className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
+            >
+              ← Back to Deliveries
+            </button>
+            <DeliveryMap
+              restaurantLocation={
+                deliveries.find(d => d._id === selectedDeliveryId)?.restaurantLocation || 'Kadawatha'
+              }
+              deliveryLocation={(() => {
+                const d = deliveries.find(d => d._id === selectedDeliveryId);
+                return d?.deliveryAddress
+                  ? `${d.deliveryAddress.street || ''}, ${d.deliveryAddress.city || ''}`
+                  : 'Kadawatha';
+              })()}
+            />
+          </div>
+        )}
 
-                  <div className="flex gap-3 mt-4">
-                    {delivery.status === 'Assigned' && (
+        {/* Ongoing Deliveries */}
+        {!selectedDeliveryId && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ongoing Deliveries</h2>
+            {ongoingDeliveries.length === 0 ? (
+              <p>No ongoing deliveries at the moment.</p>
+            ) : (
+              <div className="grid gap-6">
+                {ongoingDeliveries.map((delivery) => (
+                  <div key={delivery._id} className="border p-4 rounded shadow-md bg-white">
+                    <p><strong>Restaurant:</strong> {delivery.restaurantLocation || 'Kadawatha'}</p>
+                    <p><strong>Customer Delivery Address:</strong> {delivery.deliveryAddress ? `${delivery.deliveryAddress.street || ''}, ${delivery.deliveryAddress.city || ''}` : 'Kadawatha'}</p>
+                    <p><strong>Status:</strong> {statusBadge(delivery.status)}</p>
+
+                    <div className="flex gap-3 mt-4">
                       <button
-                        onClick={() => confirmAction(delivery._id, 'PickedUp')}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                        onClick={() => setSelectedDeliveryId(delivery._id)}
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
                       >
-                        Mark as Picked Up
+                        View on Map
                       </button>
-                    )}
-                    {delivery.status === 'PickedUp' && (
+                      {delivery.status === 'Assigned' && (
+                        <button
+                          onClick={() => confirmAction(delivery._id, 'PickedUp')}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                        >
+                          Mark as Picked Up
+                        </button>
+                      )}
+                      {delivery.status === 'PickedUp' && (
+                        <button
+                          onClick={() => confirmAction(delivery._id, 'Delivered')}
+                          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                        >
+                          Mark as Delivered
+                        </button>
+                      )}
                       <button
-                        onClick={() => confirmAction(delivery._id, 'Delivered')}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                        onClick={() => confirmAction(delivery._id, 'Cancelled')}
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
                       >
-                        Mark as Delivered
+                        Cancel Delivery
                       </button>
-                    )}
-                    <button
-                      onClick={() => confirmAction(delivery._id, 'Cancelled')}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                    >
-                      Cancel Delivery
-                    </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Completed Deliveries */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Completed Deliveries</h2>
-          {completedDeliveries.length === 0 ? (
-            <p>No completed deliveries yet.</p>
-          ) : (
-            <div className="grid gap-6">
-              {completedDeliveries.map((delivery) => (
-                <div key={delivery._id} className="border p-4 rounded shadow-md bg-gray-100">
-                  <p><strong>Restaurant:</strong> {delivery.restaurantLocation}</p>
-                  <p><strong>Customer Delivery Address:</strong> {delivery.deliveryAddress?.street}, {delivery.deliveryAddress?.city}</p>
-                  <p><strong>Status:</strong> {statusBadge(delivery.status)}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        {!selectedDeliveryId && (
+          <section>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Completed Deliveries</h2>
+            {completedDeliveries.length === 0 ? (
+              <p>No completed deliveries yet.</p>
+            ) : (
+              <div className="grid gap-6">
+                {completedDeliveries.map((delivery) => (
+                  <div key={delivery._id} className="border p-4 rounded shadow-md bg-gray-100">
+                    <p><strong>Restaurant:</strong> {delivery.restaurantLocation || 'Kadawatha'}</p>
+                    <p><strong>Customer Delivery Address:</strong> {delivery.deliveryAddress ? `${delivery.deliveryAddress.street || ''}, ${delivery.deliveryAddress.city || ''}` : 'Kadawatha'}</p>
+                    <p><strong>Status:</strong> {statusBadge(delivery.status)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
-        {/* ✅ Custom Modal */}
+        {/* Confirmation Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-md text-center w-96">

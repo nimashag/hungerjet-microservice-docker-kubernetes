@@ -81,7 +81,7 @@ const DriverMyDeliveries = () => {
   };
 
   const ongoingDeliveries = deliveries.filter(
-    (d) => d.acceptStatus === 'Accepted' 
+    (d) => d.acceptStatus === 'Accepted' && d.status !== 'Delivered' && d.status !== 'Cancelled'
   );
 
   const completedDeliveries = deliveries.filter(

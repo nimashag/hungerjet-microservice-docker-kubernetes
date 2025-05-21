@@ -284,11 +284,11 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
       console.log("User fetched:", user);
 
       // Email details
-      // const customerEmail = 'lavinduyomith2016@gmail.com';
-      const customerEmail = "dev40.emailtest@gmail.com";
+      const customerEmail = 'lavinduyomith2016@gmail.com';
+     
       const customerName = user.name;
       const deliveryAddress = order.deliveryAddress;
-      const customerPhone = "+94778964821"; //have to change this to the user phone number
+      const customerPhone = "+94778964821"; 
 
       // Email subject and content
       const subject = `Your Order with HungerJet has been Delivered!`;

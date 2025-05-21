@@ -12,7 +12,7 @@ const driverIcon = L.icon({
 });
 
 const customerIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1946/1946429.png', // person icon
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/5216/5216405.png', // person icon from Flaticon
   iconSize: [32, 32],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
@@ -56,7 +56,7 @@ const DeliveryMap = ({ restaurantLocation, deliveryLocation }: DeliveryMapProps)
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      geocodeAddress(restaurantLocation || 'Kadawatha'),
+      geocodeAddress(restaurantLocation || 'Malabe'),
       geocodeAddress(deliveryLocation || 'Kadawatha')
     ]).then(([restCoords, delCoords]) => {
       setRestaurantCoords(restCoords);

@@ -51,7 +51,7 @@ const DriverLayout = ({ children }: DriverLayoutProps) => {
 
   const navigation = [
     { name: "Dashboard", href: "/driver/dashboard", icon: LayoutDashboard },
-    { name: "Profile", href: "/driver/profile", icon: UserCircle },
+    { name: "Location update", href: "/driver/profile", icon: UserCircle },
     { name: "My Deliveries", href: "/driver/mydeliveries", icon: Truck },
    
   ];

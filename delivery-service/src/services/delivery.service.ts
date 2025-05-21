@@ -51,7 +51,7 @@ export const updateDeliveryStatusById = async (deliveryId: string, status: Deliv
   const delivery = await Delivery.findById(deliveryId);
   if (!delivery) return null;
 
-  delivery.status = status; // Now type-safe ✅
+  delivery.status = status; 
   await delivery.save();
   return delivery;
 };

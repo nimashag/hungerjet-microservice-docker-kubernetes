@@ -22,6 +22,19 @@ interface Delivery {
   acceptStatus: 'Pending' | 'Accepted' | 'Declined';
 }
 
+function haversineDistance([lat1, lon1]: [number, number], [lat2, lon2]: [number, number]) {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 const DriverMyDeliveries = () => {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +42,7 @@ const DriverMyDeliveries = () => {
   const [modalDeliveryId, setModalDeliveryId] = useState<string | null>(null);
   const [modalAction, setModalAction] = useState<'PickedUp' | 'Delivered' | 'Cancelled' | null>(null);
   const [selectedDeliveryId, setSelectedDeliveryId] = useState<string | null>(null);
+  const [distanceToRestaurant, setDistanceToRestaurant] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchDeliveries = async () => {
@@ -131,6 +145,11 @@ const DriverMyDeliveries = () => {
                   : 'Kadawatha';
               })()}
             />
+            {distanceToRestaurant !== null && (
+              <div className="mb-2 text-lg font-semibold text-blue-700">
+                Distance from driver to restaurant: {distanceToRestaurant.toFixed(2)} km
+              </div>
+            )}
           </div>
         )}
 
